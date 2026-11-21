@@ -1,0 +1,3 @@
+- insert:
+    - id: forge-gitlab-project
+      name: '@onlyfeng/dsh-forge-gitlab-project'

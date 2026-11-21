@@ -1,0 +1,18 @@
+{
+  "name": "@onlyfeng/dsh-team-coop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Coordinate a general DSH team, select project packs, and hand bounded tasks between existing teams",
+  "type": "module",
+  "license": "MIT",
+  "author": "onlyfeng",
+  "homepage": "https://github.com/onlyfeng/dsh-plugins/tree/main/packages/team-coop#readme",
+  "repository": { "type": "git", "url": "git+https://github.com/onlyfeng/dsh-plugins.git", "directory": "packages/team-coop" },
+  "keywords": ["deepseek-harness", "agent-teams", "handoff", "coordination"],
+  "main": "index.js",
+  "exports": { ".": "./index.js", "./observer": "./observer.js", "./locale/*.json": "./locale/*.json", "./observer/locale/*.json": "./locale/*.json", "./icon": "./icon.svg", "./observer/icon": "./icon.svg", "./package.json": "./package.json" },
+  "files": ["*.js", "cordis.patch.yml", "locale", "icon.svg", "LICENSE", "README.md"],
+  "engines": { "dsh": "0.2.2-rc.5", "node": ">=24" },
+  "dependencies": { "@deepseek-ai/schemastery": "3.19.0" },
+  "dsh": { "bundle": { "patch": "./cordis.patch.yml" } }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "dsh-plugins-repo",
+  "private": true,
+  "type": "module",
+  "description": "Workspace root for dsh-plugins — not published",
+  "scripts": {
+    "test": "node --test packages/*/tests/*.test.mjs",
+    "package:forge-gitlab": "node scripts/package-forge-gitlab.mjs",
+    "market:build": "node scripts/build-market.mjs",
+    "market:check": "node scripts/build-market.mjs --check"
+  },
+  "devDependencies": {
+    "@deepseek-ai/dsh-plugin-market-index": "^0.2.1-alpha.4"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "taskKey": "ec508a9a86e29b4b42e11fa0500fa70501979e33e73490bac7b18b8e690e8e85",
+  "status": "published",
+  "items": [
+    {
+      "key": "9d835545f2f1dd7ac29138d19f257c41f7e9f7cd9da9e35562273247740e1071",
+      "status": "confirmed",
+      "noteId": 21,
+      "discussionId": "ff98a04cff349b5b8ef04595f429af02c0af42d1"
+    },
+    {
+      "key": "summary",
+      "status": "confirmed",
+      "noteId": 22
+    }
+  ],
+  "updatedAt": "2001-02-03T04:05:06.000Z"
+}

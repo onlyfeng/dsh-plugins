@@ -1,0 +1,1 @@
+{ "meta": { "title": "GitLab merge requests", "description": "Read GitLab merge requests, patches and inline discussions in Change requests using glab. Access is read-only by default. Add an instance to discussionWriteHosts to reply, resolve or reopen existing threads with your GitLab permissions." } }

@@ -1,0 +1,54 @@
+{
+  "status": "complete",
+  "manifest": {
+    "schema_version": "ocr.run-manifest/v1",
+    "operation": "review",
+    "terminal_state": "complete",
+    "input": {
+      "mode": "range",
+      "resolved_base": "b0dcc343fbdf8607632d47346b57c84bb2f1691d",
+      "resolved_head": "71376fd5346c023f49dd842e07978b336ed03917"
+    },
+    "coverage": {
+      "selected": [
+        {
+          "item_id": "a6a6c78bfaf96eb6a9c1941b7406cc171be1c8a7e9f52eb578cd4ae8e94771f4",
+          "path": "src/span.js",
+          "old_path": "src/extent.js",
+          "fingerprint": "038d79be7c38ed16fc84ea610130dd283e756fd53d3aa457cfeb0b8be72e2bb4"
+        }
+      ],
+      "completed": [
+        {
+          "item_id": "a6a6c78bfaf96eb6a9c1941b7406cc171be1c8a7e9f52eb578cd4ae8e94771f4",
+          "path": "src/span.js",
+          "old_path": "src/extent.js",
+          "fingerprint": "038d79be7c38ed16fc84ea610130dd283e756fd53d3aa457cfeb0b8be72e2bb4"
+        }
+      ],
+      "reused": [],
+      "failed": [],
+      "waived": [],
+      "excluded": [
+        {
+          "item_id": "8f0c85bd250b634d32a4e196f395958f16d9ea885b8f9977c583687002114d0b",
+          "path": "src/retired-unit.js",
+          "exclude_reason": "deleted"
+        }
+      ]
+    }
+  },
+  "comments": [
+    {
+      "path": "src/span.js",
+      "content": "The subtraction is backwards. The contract on line 1 says span = max - min, but this line returns min - max, so the result is negative for any input with more than one distinct value. Counterexample: `span([2, 9])` now returns `2 - 9 = -7`, where the expected value is `7`. This rename was meant to keep behavior the same, and the old code returned `high - low`.",
+      "start_line": 10,
+      "end_line": 10,
+      "severity": "critical"
+    }
+  ],
+  "summary": {
+    "files_reviewed": 1,
+    "comments": 1
+  }
+}

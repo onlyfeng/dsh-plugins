@@ -1,0 +1,8 @@
+# Inserted disabled: `baseURL` has no default (a gateway address is
+# deployment-specific), so the plugin throws at load without it. A profile
+# overlays this row with `disabled: false` plus its own `baseURL`/`apiKeyEnv`
+# after installing — see README.md "安装".
+- insert:
+    - id: web-search-gateway
+      name: '@onlyfeng/dsh-web-search-gateway'
+      disabled: true

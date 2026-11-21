@@ -1,0 +1,1 @@
+{ "meta": { "title": "项目开放 MR", "description": "从会话右侧栏查看当前 GitLab 项目的开放合并请求，选择要在本会话变更请求面板中跟踪的 MR。需要启用变更请求与工作树和 GitLab provider。" } }

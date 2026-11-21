@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "taskKey": "ec508a9a86e29b4b42e11fa0500fa70501979e33e73490bac7b18b8e690e8e85",
+  "runId": "ec508a9a86e29b4b42e11fa0500fa70501979e33e73490bac7b18b8e690e8e85",
+  "status": "complete",
+  "findings": [
+    {
+      "fingerprint": "5103141fcc7a6cf61879ea34aa03a5f16febcb370dc01e8bfcad060c35361ec9",
+      "path": "src/span.js",
+      "oldPath": "src/extent.js",
+      "side": "new",
+      "startLine": 10,
+      "endLine": 10,
+      "severity": "critical",
+      "body": "The subtraction is backwards. The contract on line 1 says span = max - min, but this line returns min - max, so the result is negative for any input with more than one distinct value. Counterexample: `span([2, 9])` now returns `2 - 9 = -7`, where the expected value is `7`. This rename was meant to keep behavior the same, and the old code returned `high - low`."
+    }
+  ],
+  "coverage": {
+    "selected": [
+      {
+        "item_id": "a6a6c78bfaf96eb6a9c1941b7406cc171be1c8a7e9f52eb578cd4ae8e94771f4",
+        "path": "src/span.js",
+        "old_path": "src/extent.js",
+        "fingerprint": "038d79be7c38ed16fc84ea610130dd283e756fd53d3aa457cfeb0b8be72e2bb4"
+      }
+    ],
+    "reviewed": [
+      {
+        "item_id": "a6a6c78bfaf96eb6a9c1941b7406cc171be1c8a7e9f52eb578cd4ae8e94771f4",
+        "path": "src/span.js",
+        "old_path": "src/extent.js",
+        "fingerprint": "038d79be7c38ed16fc84ea610130dd283e756fd53d3aa457cfeb0b8be72e2bb4"
+      }
+    ],
+    "failed": [],
+    "waived": [],
+    "excluded": [
+      {
+        "item_id": "8f0c85bd250b634d32a4e196f395958f16d9ea885b8f9977c583687002114d0b",
+        "path": "src/retired-unit.js",
+        "exclude_reason": "deleted"
+      }
+    ],
+    "unverified": []
+  },
+  "warnings": [],
+  "usage": {
+    "files_reviewed": 1,
+    "comments": 1
+  }
+}

@@ -1,0 +1,1 @@
+{ "meta": { "title": "Project merge requests", "description": "Browse open merge requests in the current session’s GitLab project and link a selection to its change request panel. Enable Change requests & worktrees and a GitLab forge provider." } }

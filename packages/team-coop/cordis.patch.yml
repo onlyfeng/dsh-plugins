@@ -1,0 +1,123 @@
+- insert:
+    - id: team-coop
+      name: '@onlyfeng/dsh-team-coop'
+      config: { siteFile: '' }
+    - id: team-coop-observer-policy
+      name: '@onlyfeng/dsh-team-coop/observer'
+    - id: preset-federated-team
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: federated-team
+        name: 通用协作团队
+        description: 按项目组织执行、独立复核和观察角色，与现有主控协商写域和交回。
+        order: 26
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |
+                You coordinate a general-purpose team. Start from the user's outcome and inspect team_cooperate status and packs. Use a project pack when its brief, roles and acceptance gates match the work. Enable Agent Teams in the root session to use its shared task board.
+                When a user changes capacity, a task becomes ready, a candidate is waiting for review or a member returns, inspect team_staffing. Apply one bounded allocation with team_allocate, which preserves per-turn budgets and queued task reservations. Respect a paused team until the user resumes it. Choose a configured host with host; use the llm option for supported per-task model settings. Use list_subagent_models to choose an allowed provider, model and reasoning_effort. Worker's existing context, tested capabilities, costs and role determine routing. For a model change on active work, collect a checkpoint and assign a successor on the requested route. On a shrink request ask busy members to drain and stop giving them new work. Use names or full paths when attaching an observer or a separately scoped helper to a particular member.
+                Permanent coordinators own the outcome, budget and decisions across turns. Give each helper a specific return condition. The reviewer must be a different actor from the author. Give runnable verification with explicit input and permitted outputs to delegate_validate. Let delegate_observe review recorded evidence or an existing member at a milestone. Pool members across eligible tasks when context is relevant. Use subsidiary delegation only within the configured Host depth, otherwise the Lead can attach a sibling to support that owner.
+                For each slice record its task ID, owner, dependencies, workspace-relative write scopes, input version, acceptance criteria, evidence destination and next checkpoint. Claim before implementation. Send the task to the owner after assigning it. Choose the smallest team that can deliver independently reviewable results.
+                Delegate implementation to delegate_work. Use delegate_review for a non-author verdict on a pinned candidate. Use delegate_observe for health observations, evidence quality, or improvement suggestions. Keep the observer's recommendations with the responsible Lead for adoption. Record what was actually tested and the accepted scope.
+                Consult an existing team through its current coordinator. Give it the contract digest and scoped proposal. For shared work, each coordinator retains its own people and ledger. Reserve overlapping scopes across projects that address the same files. Before touching an externally owned scope, confirm the current writer reached a safe checkpoint and the controller's grant is durably registered. A queued notification or silence is insufficient evidence of transfer.
+                Use the contract deadline and current revision. At expiry stop writing, collect pending work, deliver the pinned checkpoint and wait for the original controller's return receipt. Reconcile an interrupted session with the original ledger and team_cooperate status. Check for open contracts before leaving. Human merge decisions and project permissions continue to apply.
+          - id: instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config: { maxBytes: 65536 }
+          - id: board
+            name: '@deepseek-ai/dsh-tool-agent-team'
+          - id: work
+            name: '@deepseek-ai/dsh-tool-subagent'
+            config: { provider: spawn, toolName: delegate_work, agentPreset: federated-worker, modelSelection: true, modelDiscovery: true }
+          - id: review
+            name: '@deepseek-ai/dsh-tool-subagent'
+            config: { provider: spawn, toolName: delegate_review, agentPreset: federated-observer, modelSelection: true }
+          - id: observe
+            name: '@deepseek-ai/dsh-tool-subagent'
+            config: { provider: spawn, toolName: delegate_observe, agentPreset: federated-observer, modelSelection: true }
+          - id: validate
+            name: '@deepseek-ai/dsh-tool-subagent'
+            config: { provider: spawn, toolName: delegate_validate, agentPreset: federated-worker, modelSelection: true }
+          - id: assist
+            name: '@deepseek-ai/dsh-tool-subagent'
+            config: { provider: spawn, toolName: delegate_assist, agentPreset: federated-worker, modelSelection: true }
+          - id: coordination
+            name: '@deepseek-ai/dsh-tool-subagent-control'
+          - id: worktree
+            name: '@deepseek-ai/dsh-experimental-tool-worktree'
+          - id: powershell
+            name: '@deepseek-ai/dsh-tool-pwsh'
+            disabled: !!js process.platform !== 'win32'
+          - id: bash
+            name: '@deepseek-ai/dsh-tool-bash'
+            disabled: !!js process.platform === 'win32'
+          - id: files
+            name: '@deepseek-ai/dsh-tool-fs'
+          - id: search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config: { sampleOverCapGlobResults: false }
+          - id: jobs
+            name: '@deepseek-ai/dsh-tool-jobs'
+    - id: preset-federated-worker
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: federated-worker
+        name: 协作执行者
+        description: 按 Lead 分派的任务和写域实施，提交候选及验证记录。
+        order: 27
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |
+                When labelled validator, run the requested checks and write only authorized test outputs. A helper receives a separate scope and reports to both the task owner and Lead. For a deeper bounded task, use an available delegation level or request a Lead-attached helper. Implement the slice assigned by the Lead. Read the project pack, instructions, task, version and ledger first. For external work check the live contract and exact scope with team_cooperate status before writing. Stop at a release, timeout, changed input or contested scope. Give the Lead the candidate, verification results, remaining unknowns and the location of the handback evidence.
+          - id: instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config: { maxBytes: 65536 }
+          - id: board
+            name: '@deepseek-ai/dsh-tool-agent-team'
+          - id: nested-assist
+            name: '@deepseek-ai/dsh-tool-subagent'
+            config: { provider: spawn, toolName: delegate_assist, agentPreset: federated-worker, modelSelection: true, modelDiscovery: true }
+          - id: nested-observe
+            name: '@deepseek-ai/dsh-tool-subagent'
+            config: { provider: spawn, toolName: delegate_observe, agentPreset: federated-observer, modelSelection: true }
+          - id: powershell
+            name: '@deepseek-ai/dsh-tool-pwsh'
+            disabled: !!js process.platform !== 'win32'
+          - id: bash
+            name: '@deepseek-ai/dsh-tool-bash'
+            disabled: !!js process.platform === 'win32'
+          - id: files
+            name: '@deepseek-ai/dsh-tool-fs'
+          - id: search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config: { sampleOverCapGlobResults: false }
+          - id: jobs
+            name: '@deepseek-ai/dsh-tool-jobs'
+    - id: preset-federated-observer
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: federated-observer
+        name: 协作观察与独立复核
+        description: 对指定范围提供只读核查、监控建议或非作者复核结论。
+        order: 28
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |
+                Return your report to the caller. As an operations observer separate active work, normal waiting, a recovered error and a verified delivery blocker. As an improvement adviser describe the observation, impact, evidence and a reversible experiment. As an independent reviewer name the input version, acceptance criteria, checked evidence, limits and scoped verdict. Distinguish receipt, execution, candidate, independent verification and adoption. The owning Lead decides whether and when to act.
+          - id: instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config: { maxBytes: 65536 }
+          - id: files
+            name: '@deepseek-ai/dsh-tool-fs'
+            config: { read: true, write: false, edit: false, applyPatch: false }
+          - id: search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config: { sampleOverCapGlobResults: false }
+          - id: board
+            name: '@deepseek-ai/dsh-tool-agent-team'

@@ -1,0 +1,295 @@
+{
+  "format": 1,
+  "title": {
+    "en": "onlyfeng/dsh-plugins",
+    "zh": "onlyfeng 的 DSH 插件集"
+  },
+  "description": {
+    "en": "Community DeepSeek Harness bundles by onlyfeng.",
+    "zh": "onlyfeng 维护的 DeepSeek Harness 社区插件。"
+  },
+  "plugins": [
+    {
+      "name": "@onlyfeng/dsh-forge-gitlab",
+      "title": {
+        "en": "GitLab merge request review",
+        "zh": "GitLab 合并请求评审"
+      },
+      "description": "Read GitLab merge requests and inline discussions in the DSH change request panel through glab",
+      "author": "onlyfeng",
+      "homepage": "https://github.com/onlyfeng/dsh-plugins/tree/main/packages/forge-gitlab#readme",
+      "repository": {
+        "url": "https://github.com/onlyfeng/dsh-plugins",
+        "directory": "packages/forge-gitlab"
+      },
+      "metadata": {
+        "keywords": [
+          "deepseek-harness",
+          "gitlab",
+          "forge",
+          "merge-request",
+          "code-review"
+        ]
+      },
+      "dist-tags": {
+        "latest": "0.1.1",
+        "next": "0.2.0-rc.1"
+      },
+      "versions": [
+        {
+          "version": "0.2.0-rc.1",
+          "publishTimestamp": 1795054803,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/onlyfeng/dsh-plugins",
+            "commit": "e90ed5d2fb506849554fd4a4c38e9b5baae93e15",
+            "path": "packages/forge-gitlab"
+          },
+          "engines": {
+            "dsh": "0.2.2-rc.3 || 0.2.2-rc.5"
+          }
+        },
+        {
+          "version": "0.1.1",
+          "publishTimestamp": 1795051206,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/onlyfeng/dsh-plugins",
+            "commit": "acbfecad5af1e85fd3d1dbcdf405e4b599af3234",
+            "path": "packages/forge-gitlab"
+          },
+          "engines": {
+            "dsh": "0.2.2-rc.3 || 0.2.2-rc.5"
+          }
+        }
+      ]
+    },
+    {
+      "name": "@onlyfeng/dsh-forge-gitlab-project",
+      "title": {
+        "en": "GitLab project merge request picker",
+        "zh": "GitLab 项目合并请求选择器"
+      },
+      "description": "Choose open GitLab merge requests from the session project and link them to its change request panel",
+      "author": "onlyfeng",
+      "homepage": "https://github.com/onlyfeng/dsh-plugins/tree/main/packages/forge-gitlab-project#readme",
+      "repository": {
+        "url": "https://github.com/onlyfeng/dsh-plugins",
+        "directory": "packages/forge-gitlab-project"
+      },
+      "metadata": {
+        "keywords": [
+          "deepseek-harness",
+          "gitlab",
+          "merge-request",
+          "project",
+          "session"
+        ]
+      },
+      "dist-tags": {
+        "latest": "0.1.0"
+      },
+      "versions": [
+        {
+          "version": "0.1.0",
+          "publishTimestamp": 1795240028,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/onlyfeng/dsh-plugins",
+            "commit": "11be8ca3eed9a0b713349830961d0bdb986153b5",
+            "path": "packages/forge-gitlab-project"
+          },
+          "engines": {
+            "dsh": "0.2.2-rc.5"
+          }
+        },
+        {
+          "version": "0.1.0-rc.1",
+          "publishTimestamp": 1795067960,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/onlyfeng/dsh-plugins",
+            "commit": "75246797c0d724063627d025cc7e282e7924eaff",
+            "path": "packages/forge-gitlab-project"
+          },
+          "engines": {
+            "dsh": "0.2.2-rc.5"
+          }
+        }
+      ]
+    },
+    {
+      "name": "@onlyfeng/dsh-ocr-team",
+      "title": {
+        "en": "Open Code Review tasks for Agent Teams",
+        "zh": "Open Code Review 团队审查任务"
+      },
+      "description": "Import published Open Code Review findings into a DeepSeek Harness Team board for a configured GitLab checkout",
+      "author": "onlyfeng",
+      "homepage": "https://github.com/onlyfeng/dsh-plugins/tree/main/packages/ocr-team#readme",
+      "repository": {
+        "url": "https://github.com/onlyfeng/dsh-plugins",
+        "directory": "packages/ocr-team"
+      },
+      "metadata": {
+        "keywords": [
+          "deepseek-harness",
+          "open-code-review",
+          "gitlab",
+          "agent-teams"
+        ]
+      },
+      "dist-tags": {
+        "latest": "0.1.0"
+      },
+      "versions": [
+        {
+          "version": "0.1.0",
+          "publishTimestamp": 1795240028,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/onlyfeng/dsh-plugins",
+            "commit": "11be8ca3eed9a0b713349830961d0bdb986153b5",
+            "path": "packages/ocr-team"
+          },
+          "engines": {
+            "dsh": "0.2.2-rc.5"
+          }
+        },
+        {
+          "version": "0.1.0-rc.2",
+          "publishTimestamp": 1795239925,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/onlyfeng/dsh-plugins",
+            "commit": "6939fd6ddfb3f23c68493e9328cade85da92581c",
+            "path": "packages/ocr-team"
+          },
+          "engines": {
+            "dsh": "0.2.2-rc.5"
+          }
+        },
+        {
+          "version": "0.1.0-rc.1",
+          "publishTimestamp": 1795233801,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/onlyfeng/dsh-plugins",
+            "commit": "5b3603c5e5810d662adfb8a516251fd65fc50a38",
+            "path": "packages/ocr-team"
+          },
+          "engines": {
+            "dsh": "0.2.2-rc.5"
+          }
+        }
+      ]
+    },
+    {
+      "name": "@onlyfeng/dsh-team-coop",
+      "title": {
+        "en": "Agent team coordination and handoffs",
+        "zh": "Agent 团队协作与任务交接"
+      },
+      "description": "Coordinate a general DSH team, select project packs, and hand bounded tasks between existing teams",
+      "author": "onlyfeng",
+      "homepage": "https://github.com/onlyfeng/dsh-plugins/tree/main/packages/team-coop#readme",
+      "repository": {
+        "url": "https://github.com/onlyfeng/dsh-plugins",
+        "directory": "packages/team-coop"
+      },
+      "metadata": {
+        "keywords": [
+          "deepseek-harness",
+          "agent-teams",
+          "handoff",
+          "coordination"
+        ]
+      },
+      "dist-tags": {
+        "latest": "0.1.0"
+      },
+      "versions": [
+        {
+          "version": "0.1.0",
+          "publishTimestamp": 1795240028,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/onlyfeng/dsh-plugins",
+            "commit": "11be8ca3eed9a0b713349830961d0bdb986153b5",
+            "path": "packages/team-coop"
+          },
+          "engines": {
+            "dsh": "0.2.2-rc.5"
+          }
+        },
+        {
+          "version": "0.1.0-rc.2",
+          "publishTimestamp": 1795239925,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/onlyfeng/dsh-plugins",
+            "commit": "6939fd6ddfb3f23c68493e9328cade85da92581c",
+            "path": "packages/team-coop"
+          },
+          "engines": {
+            "dsh": "0.2.2-rc.5"
+          }
+        },
+        {
+          "version": "0.1.0-rc.1",
+          "publishTimestamp": 1795235920,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/onlyfeng/dsh-plugins",
+            "commit": "ef7790ae838e4eb944721fb0f37b1433b26286d7",
+            "path": "packages/team-coop"
+          },
+          "engines": {
+            "dsh": "0.2.2-rc.5"
+          }
+        }
+      ]
+    },
+    {
+      "name": "@onlyfeng/dsh-web-search-gateway",
+      "title": {
+        "en": "Web search gateway",
+        "zh": "网页搜索网关"
+      },
+      "description": "ctx.web search providers that run an OpenAI Responses or Anthropic Messages gateway's own server-side web_search tool",
+      "author": "onlyfeng",
+      "homepage": "https://github.com/onlyfeng/dsh-plugins/tree/main/packages/web-search-gateway#readme",
+      "repository": {
+        "url": "https://github.com/onlyfeng/dsh-plugins",
+        "directory": "packages/web-search-gateway"
+      },
+      "metadata": {
+        "keywords": [
+          "deepseek-harness",
+          "dsh",
+          "cordis",
+          "plugin",
+          "web-search"
+        ]
+      },
+      "dist-tags": {
+        "latest": "0.2.0"
+      },
+      "versions": [
+        {
+          "version": "0.2.0",
+          "publishTimestamp": 1795240028,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/onlyfeng/dsh-plugins",
+            "commit": "11be8ca3eed9a0b713349830961d0bdb986153b5",
+            "path": "packages/web-search-gateway"
+          },
+          "engines": {
+            "dsh": "0.2.2-rc.5 || >=0.2.0 <0.3.0"
+          }
+        }
+      ]
+    }
+  ]
+}

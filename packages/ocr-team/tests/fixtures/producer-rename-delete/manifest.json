@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "taskKey": "ec508a9a86e29b4b42e11fa0500fa70501979e33e73490bac7b18b8e690e8e85",
+  "runId": "ec508a9a86e29b4b42e11fa0500fa70501979e33e73490bac7b18b8e690e8e85",
+  "projectKey": "span",
+  "createdAt": "2001-02-03T04:05:06.000Z",
+  "snapshot": {
+    "instanceId": "public-sample",
+    "projectId": 11,
+    "sourceProjectId": 11,
+    "targetProjectId": 11,
+    "iid": 2,
+    "sourceBranch": "test/span",
+    "targetBranch": "main",
+    "state": "opened",
+    "draft": false,
+    "baseSha": "b0dcc343fbdf8607632d47346b57c84bb2f1691d",
+    "startSha": "b0dcc343fbdf8607632d47346b57c84bb2f1691d",
+    "headSha": "71376fd5346c023f49dd842e07978b336ed03917",
+    "targetTip": "b0dcc343fbdf8607632d47346b57c84bb2f1691d",
+    "diffVersionId": 3,
+    "diffComplete": true,
+    "diffFileListComplete": true,
+    "cloneUrl": "https://forge.example.test/demo/span.git",
+    "webUrl": "https://forge.example.test/demo/span/-/merge_requests/2",
+    "files": [
+      {
+        "oldPath": "src/extent.js",
+        "newPath": "src/span.js",
+        "newFile": false,
+        "deletedFile": false,
+        "renamedFile": true,
+        "collapsed": false,
+        "tooLarge": false,
+        "diff": "@@ -7,5 +7,5 @@\n \n \n \n-\n+\n "
+      },
+      {
+        "oldPath": "src/retired-unit.js",
+        "newPath": "src/retired-unit.js",
+        "newFile": false,
+        "deletedFile": true,
+        "renamedFile": false,
+        "collapsed": false,
+        "tooLarge": false,
+        "diff": "@@ -1 +0,0 @@\n-"
+      }
+    ]
+  },
+  "identity": {
+    "integrationVersion": "0.1.0",
+    "implementationHash": "5ad25a3393f3e7110c9618f15ea86ef73a09e82c551d53b206f15e744c6e82a3",
+    "projectKey": "span",
+    "cloneUrl": "https://forge.example.test/demo/span.git",
+    "snapshot": {
+      "instanceId": "public-sample",
+      "projectId": 11,
+      "sourceProjectId": 11,
+      "targetProjectId": 11,
+      "iid": 2,
+      "sourceBranch": "test/span",
+      "targetBranch": "main",
+      "state": "opened",
+      "draft": false,
+      "baseSha": "b0dcc343fbdf8607632d47346b57c84bb2f1691d",
+      "startSha": "b0dcc343fbdf8607632d47346b57c84bb2f1691d",
+      "headSha": "71376fd5346c023f49dd842e07978b336ed03917",
+      "targetTip": "b0dcc343fbdf8607632d47346b57c84bb2f1691d",
+      "diffVersionId": 3,
+      "diffComplete": true,
+      "diffFileListComplete": true,
+      "cloneUrl": "https://forge.example.test/demo/span.git",
+      "filesHash": "b9935557ccfb99cd59f1cb4187be4898497e32e7496e7512bd5e6e03f62c4c16"
+    },
+    "installation": {
+      "version": "0.0.0-public-fixture",
+      "artifactSha256": "ebad70c511ec83c0e67428ae3a5c4bda70f03ff873ef5c18b296e33b9bbcb836"
+    },
+    "provider": {
+      "name": "sample",
+      "baseUrl": "https://model.example.test/v1",
+      "protocol": "openai",
+      "model": "sample",
+      "timeoutSeconds": 60,
+      "nativeConfigHash": "c444a508cc0dfff8c3f98f0a1fe5a15e0017152fb122f9df7a57342326bfa693"
+    },
+    "ruleHash": "7039b080e725ce413fe87044ffcb5e1004428f0fd0cbbe73274d78f3c0385e71",
+    "backgroundHash": "00aa0cc34fbd8a5a4cbde2912aeac963fd3f2eb79512dd74808d7140b5960e3d",
+    "effort": "low",
+    "concurrency": 1,
+    "maxTokensBudget": 140000,
+    "checkout": {
+      "sparsePatterns": [
+        "/src/"
+      ]
+    },
+    "executionTimeoutSeconds": 480,
+    "taskTimeoutMinutes": 12
+  }
+}

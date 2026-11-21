@@ -1,0 +1,10 @@
+{
+  "include": ["src/**/*.js"],
+  "rules": [
+    {
+      "path": "src/**/*.js",
+      "rule": "Review arithmetic behavior on the changed lines. Give a concrete counterexample when the result contradicts the function's contract.",
+      "merge_system_rule": false
+    }
+  ]
+}

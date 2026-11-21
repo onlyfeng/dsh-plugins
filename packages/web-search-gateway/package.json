@@ -1,0 +1,37 @@
+{
+  "name": "@onlyfeng/dsh-web-search-gateway",
+  "version": "0.2.0",
+  "description": "ctx.web search providers that run an OpenAI Responses or Anthropic Messages gateway's own server-side web_search tool",
+  "type": "module",
+  "license": "MIT",
+  "author": "onlyfeng",
+  "homepage": "https://github.com/onlyfeng/dsh-plugins/tree/main/packages/web-search-gateway#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/onlyfeng/dsh-plugins.git",
+    "directory": "packages/web-search-gateway"
+  },
+  "bugs": {
+    "url": "https://github.com/onlyfeng/dsh-plugins/issues"
+  },
+  "keywords": ["deepseek-harness", "dsh", "cordis", "plugin", "web-search"],
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "files": ["index.js", "cordis.patch.yml", "locale", "icon.svg", "README.md"],
+  "engines": {
+    "dsh": "0.2.2-rc.5 || >=0.2.0 <0.3.0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/schemastery": "*"
+  }
+}

@@ -1,0 +1,1 @@
+This sample computes the width of a finite set of numbers. For example, the span of [2, 9] is 7. Moving the implementation to a new path is intended to preserve this behavior. The retired unit label has no callers.

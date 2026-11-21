@@ -1,0 +1,79 @@
+name: market-check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: market-pages
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Release manifests and the event base can both predate the current checkout.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Reject deployment-specific identifiers
+        run: node scripts/check-public-content.mjs
+
+      - run: corepack enable
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm test
+
+      - name: Load portable GitLab bundle outside the workspace
+        run: |
+          node scripts/package-forge-gitlab.mjs "$RUNNER_TEMP/forge-gitlab"
+          cd "$RUNNER_TEMP/forge-gitlab"
+          node --input-type=module -e "import * as p from './index.js'; p.apply({ forge: { register(provider) { if (provider.forge !== 'gitlab') throw Error('missing gitlab provider') } } }, p.Config({}))"
+
+      - name: Test release history and market channels
+        run: node --test scripts/tests/market-releases.test.mjs
+
+      - name: Verify the catalog and preserve already published versions
+        env:
+          MARKET_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: pnpm run market:check --base "$MARKET_BASE"
+
+      - name: Syntax-check every plugin entry point
+        run: |
+          set -euo pipefail
+          for f in packages/*/index.js; do
+            echo "node --check $f"
+            node --check "$f"
+          done
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
