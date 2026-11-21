@@ -1,1 +1,5 @@
-node_modules/.agents/dist/*.tgz.DS_Store
+node_modules/
+.agents/
+dist/
+*.tgz
+.DS_Store

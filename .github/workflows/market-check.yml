@@ -44,7 +44,7 @@ jobs:
 
       - name: Verify the catalog and preserve already published versions
         env:
-          MARKET_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          MARKET_BASE: ${{ github.event.pull_request.base.sha || github.event.before || '0000000000000000000000000000000000000000' }}
         run: pnpm run market:check --base "$MARKET_BASE"
 
       - name: Syntax-check every plugin entry point

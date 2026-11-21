@@ -1,38 +1,81 @@
 {
   "listings": {
     "@onlyfeng/dsh-forge-gitlab": {
-      "title": { "en": "GitLab merge request review", "zh": "GitLab 合并请求评审" },
-      "dist-tags": { "latest": "0.1.1", "next": "0.2.0-rc.1" }
+      "title": {
+        "en": "GitLab merge request review",
+        "zh": "GitLab 合并请求评审"
+      },
+      "dist-tags": {
+        "latest": "0.1.2"
+      }
     },
     "@onlyfeng/dsh-forge-gitlab-project": {
-      "title": { "en": "GitLab project merge request picker", "zh": "GitLab 项目合并请求选择器" },
-      "dist-tags": { "latest": "0.1.0" }
+      "title": {
+        "en": "GitLab project merge request picker",
+        "zh": "GitLab 项目合并请求选择器"
+      },
+      "dist-tags": {
+        "latest": "0.1.1"
+      }
     },
     "@onlyfeng/dsh-ocr-team": {
-      "title": { "en": "Open Code Review tasks for Agent Teams", "zh": "Open Code Review 团队审查任务" },
-      "dist-tags": { "latest": "0.1.0" }
+      "title": {
+        "en": "Open Code Review tasks for Agent Teams",
+        "zh": "Open Code Review 团队审查任务"
+      },
+      "dist-tags": {
+        "latest": "0.1.1"
+      }
     },
     "@onlyfeng/dsh-team-coop": {
-      "title": { "en": "Agent team coordination and handoffs", "zh": "Agent 团队协作与任务交接" },
-      "dist-tags": { "latest": "0.1.0" }
+      "title": {
+        "en": "Agent team coordination and handoffs",
+        "zh": "Agent 团队协作与任务交接"
+      },
+      "dist-tags": {
+        "latest": "0.1.1"
+      }
     },
     "@onlyfeng/dsh-web-search-gateway": {
-      "title": { "en": "Web search gateway", "zh": "网页搜索网关" },
-      "dist-tags": { "latest": "0.2.0" }
+      "title": {
+        "en": "Web search gateway",
+        "zh": "网页搜索网关"
+      },
+      "dist-tags": {
+        "latest": "0.2.1"
+      }
     }
   },
   "releases": [
-    { "name": "@onlyfeng/dsh-forge-gitlab", "version": "0.1.1", "path": "packages/forge-gitlab", "commit": "acbfecad5af1e85fd3d1dbcdf405e4b599af3234" },
-    { "name": "@onlyfeng/dsh-forge-gitlab", "version": "0.2.0-rc.1", "path": "packages/forge-gitlab", "commit": "e90ed5d2fb506849554fd4a4c38e9b5baae93e15" },
-    { "name": "@onlyfeng/dsh-forge-gitlab-project", "version": "0.1.0-rc.1", "path": "packages/forge-gitlab-project", "commit": "75246797c0d724063627d025cc7e282e7924eaff" },
-    { "name": "@onlyfeng/dsh-ocr-team", "version": "0.1.0-rc.1", "path": "packages/ocr-team", "commit": "5b3603c5e5810d662adfb8a516251fd65fc50a38" },
-    { "name": "@onlyfeng/dsh-team-coop", "version": "0.1.0-rc.1", "path": "packages/team-coop", "commit": "ef7790ae838e4eb944721fb0f37b1433b26286d7" },
-    { "name": "dsh-web-search-gateway", "version": "0.1.3", "path": "packages/web-search-gateway", "commit": "fc55dcda16b943c113027fd47c06404d3fbe2f39" },
-    { "name": "@onlyfeng/dsh-ocr-team", "version": "0.1.0-rc.2", "path": "packages/ocr-team", "commit": "6939fd6ddfb3f23c68493e9328cade85da92581c" },
-    { "name": "@onlyfeng/dsh-team-coop", "version": "0.1.0-rc.2", "path": "packages/team-coop", "commit": "6939fd6ddfb3f23c68493e9328cade85da92581c" },
-    { "name": "@onlyfeng/dsh-forge-gitlab-project", "version": "0.1.0", "path": "packages/forge-gitlab-project", "commit": "11be8ca3eed9a0b713349830961d0bdb986153b5" },
-    { "name": "@onlyfeng/dsh-ocr-team", "version": "0.1.0", "path": "packages/ocr-team", "commit": "11be8ca3eed9a0b713349830961d0bdb986153b5" },
-    { "name": "@onlyfeng/dsh-team-coop", "version": "0.1.0", "path": "packages/team-coop", "commit": "11be8ca3eed9a0b713349830961d0bdb986153b5" },
-    { "name": "@onlyfeng/dsh-web-search-gateway", "version": "0.2.0", "path": "packages/web-search-gateway", "commit": "11be8ca3eed9a0b713349830961d0bdb986153b5" }
+    {
+      "name": "@onlyfeng/dsh-forge-gitlab",
+      "version": "0.1.2",
+      "path": "packages/forge-gitlab",
+      "commit": "310384d484812f8c605ac818ed4cd52aa760d646"
+    },
+    {
+      "name": "@onlyfeng/dsh-forge-gitlab-project",
+      "version": "0.1.1",
+      "path": "packages/forge-gitlab-project",
+      "commit": "310384d484812f8c605ac818ed4cd52aa760d646"
+    },
+    {
+      "name": "@onlyfeng/dsh-ocr-team",
+      "version": "0.1.1",
+      "path": "packages/ocr-team",
+      "commit": "310384d484812f8c605ac818ed4cd52aa760d646"
+    },
+    {
+      "name": "@onlyfeng/dsh-team-coop",
+      "version": "0.1.1",
+      "path": "packages/team-coop",
+      "commit": "310384d484812f8c605ac818ed4cd52aa760d646"
+    },
+    {
+      "name": "@onlyfeng/dsh-web-search-gateway",
+      "version": "0.2.1",
+      "path": "packages/web-search-gateway",
+      "commit": "310384d484812f8c605ac818ed4cd52aa760d646"
+    }
   ]
 }
