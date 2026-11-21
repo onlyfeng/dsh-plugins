@@ -13,7 +13,7 @@ function invalidResponse() {
   throw Object.assign(new Error('Invalid GitLab review response.'), { code: 'unavailable' })
 }
 
-export function checkHead(mr, headSha) {
+function checkHead(mr, headSha) {
   const values = [mr?.sha, mr?.diff_refs?.head_sha].filter(v => v != null)
   if (!values.length || !values.every(fullSha)) invalidResponse()
   return values.every(v => v.toLowerCase() === headSha)
@@ -62,7 +62,7 @@ function location(position) {
     anchor: { commit, startLine: start.number, endLine: end.number } }
 }
 
-export function sameDiff(a, b) {
+function sameDiff(a, b) {
   return ['base_sha', 'start_sha'].every(key => a?.[key] == null || b?.[key] == null || a[key] === b[key])
 }
 
@@ -83,11 +83,7 @@ function comment(note, host, webMr) {
     url: `${webMr}#note_${note.id}`, pending: false, viewerCanEdit: false, viewerCanDelete: false }
 }
 
-export function isResolvableDiscussion(row) {
-  return row?.resolvable === true || row?.notes?.[0]?.resolvable === true
-}
-
-export function mapReviewThread(row, headSha, refs, host, webMr) {
+function thread(row, headSha, refs, host, webMr) {
   if (!isRecord(row) || !Array.isArray(row.notes) || !text(row.id)) invalidResponse()
   const root = row.notes[0] // The first note starts the discussion; replies do not set its location.
   if (row.individual_note === true || !root || root.system === true) return null
@@ -121,7 +117,7 @@ export function mapReviewThread(row, headSha, refs, host, webMr) {
     viewerCanReply: false, viewerCanResolve: false, comments }
 }
 
-export function createReadReview({ get, maxThreads = 100, permissions }) {
+export function createReadReview({ get, maxThreads = 100 }) {
   if (!Number.isSafeInteger(maxThreads) || maxThreads < 0) throw new RangeError('Invalid GitLab review thread limit.')
   return async function readReview(ref, headSha, signal) {
     const { host, owner, name } = ref.repository
@@ -140,35 +136,21 @@ export function createReadReview({ get, maxThreads = 100, permissions }) {
       if (!checkHead(before, head)) return stale()
       const threads = []
       const seen = new Set()
-      const resolvableIds = new Set()
       let truncated = false
       for (let page = 1; page <= PAGE_LIMIT; page++) {
         const rows = await read(`${mr}/discussions?per_page=${PAGE_SIZE}&page=${page}`)
         if (!Array.isArray(rows) || rows.length > PAGE_SIZE) invalidResponse()
         for (const row of rows) {
           if (seen.has(row?.id)) continue
-          const item = mapReviewThread(row, head, before.diff_refs, host, webMr)
+          const item = thread(row, head, before.diff_refs, host, webMr)
           seen.add(row.id)
           if (!item) continue
           if (threads.length === maxThreads) { truncated = true; break }
-          if (isResolvableDiscussion(row)) resolvableIds.add(item.id)
           threads.push(item)
         }
         if (truncated || rows.length < PAGE_SIZE) break
         // Transport returns JSON only. With a full final page there may be more.
         if (page === PAGE_LIMIT) truncated = true
-      }
-      if (permissions && threads.length) {
-        let grants
-        try { grants = await permissions(ref, threads, signal) } catch { signal.throwIfAborted() }
-        signal.throwIfAborted()
-        if (grants instanceof Map) {
-          for (const item of threads) {
-            const grant = grants.get(item.id)
-            item.viewerCanReply = grant?.reply === true
-            item.viewerCanResolve = resolvableIds.has(item.id) && grant?.resolve === true
-          }
-        }
       }
       const after = await read(mr)
       if (!checkHead(after, head) || !sameDiff(before.diff_refs, after.diff_refs)) return stale()

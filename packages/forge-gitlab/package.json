@@ -1,18 +1,50 @@
 {
   "name": "@onlyfeng/dsh-forge-gitlab",
-  "version": "0.2.0-rc.1",
+  "version": "0.1.2",
   "private": true,
-  "description": "Read GitLab merge requests and optionally reply to, resolve, or reopen discussions in the DSH change request panel",
+  "description": "Read GitLab merge requests and inline discussions in the DSH change request panel through glab",
   "type": "module",
   "license": "MIT",
   "author": "onlyfeng",
   "homepage": "https://github.com/onlyfeng/dsh-plugins/tree/main/packages/forge-gitlab#readme",
-  "repository": { "type": "git", "url": "git+https://github.com/onlyfeng/dsh-plugins.git", "directory": "packages/forge-gitlab" },
-  "keywords": ["deepseek-harness", "gitlab", "forge", "merge-request", "code-review"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/onlyfeng/dsh-plugins.git",
+    "directory": "packages/forge-gitlab"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "gitlab",
+    "forge",
+    "merge-request",
+    "code-review"
+  ],
   "main": "index.js",
-  "exports": { ".": "./index.js", "./package.json": "./package.json", "./locale/*.json": "./locale/*.json", "./icon": "./icon.svg" },
-  "files": ["*.js", "runtime", "locale", "icon.svg", "cordis.patch.yml", "README.md", "LICENSE", "LICENSE.upstream"],
-  "engines": { "dsh": "0.2.2-rc.3 || 0.2.2-rc.5" },
-  "dsh": { "bundle": { "patch": "./cordis.patch.yml" } },
-  "dependencies": { "@deepseek-ai/schemastery": "3.19.0" }
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "*.js",
+    "runtime",
+    "locale",
+    "icon.svg",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE",
+    "LICENSE.upstream"
+  ],
+  "engines": {
+    "dsh": "0.2.2-rc.3 || 0.2.2-rc.5"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "3.19.0"
+  }
 }

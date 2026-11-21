@@ -1,20 +1,53 @@
 {
   "name": "@onlyfeng/dsh-forge-gitlab-project",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Choose open GitLab merge requests from the session project and link them to its change request panel",
   "type": "module",
   "license": "MIT",
   "author": "onlyfeng",
   "homepage": "https://github.com/onlyfeng/dsh-plugins/tree/main/packages/forge-gitlab-project#readme",
-  "repository": { "type": "git", "url": "git+https://github.com/onlyfeng/dsh-plugins.git", "directory": "packages/forge-gitlab-project" },
-  "keywords": ["deepseek-harness", "gitlab", "merge-request", "project", "session"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/onlyfeng/dsh-plugins.git",
+    "directory": "packages/forge-gitlab-project"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "gitlab",
+    "merge-request",
+    "project",
+    "session"
+  ],
   "main": "index.js",
-  "exports": { ".": "./index.js", "./client": "./client.js", "./locale/*.json": "./locale/*.json", "./icon": "./icon.svg", "./package.json": "./package.json" },
-  "files": ["*.js", "locale", "icon.svg", "cordis.patch.yml", "README.md", "LICENSE"],
-  "engines": { "dsh": "0.2.2-rc.5" },
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "*.js",
+    "locale",
+    "icon.svg",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "dsh": "0.2.2-rc.5"
+  },
   "dsh": {
-    "bundle": { "patch": "./cordis.patch.yml" },
-    "client": { "platform": "web", "inject": ["@deepseek-ai/dsh-client-locale", "@deepseek-ai/dsh-client-ui-sidebar-right"] }
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-sidebar-right"
+      ]
+    }
   }
 }

@@ -1,18 +1,48 @@
 {
   "name": "@onlyfeng/dsh-ocr-team",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Import published Open Code Review findings into a DeepSeek Harness Team board for a configured GitLab checkout",
   "type": "module",
   "license": "MIT",
   "author": "onlyfeng",
   "homepage": "https://github.com/onlyfeng/dsh-plugins/tree/main/packages/ocr-team#readme",
-  "repository": { "type": "git", "url": "git+https://github.com/onlyfeng/dsh-plugins.git", "directory": "packages/ocr-team" },
-  "keywords": ["deepseek-harness", "open-code-review", "gitlab", "agent-teams"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/onlyfeng/dsh-plugins.git",
+    "directory": "packages/ocr-team"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "open-code-review",
+    "gitlab",
+    "agent-teams"
+  ],
   "main": "index.js",
-  "exports": { ".": "./index.js", "./receipts": "./receipts.js", "./locale/*.json": "./locale/*.json", "./icon": "./icon.svg", "./package.json": "./package.json" },
-  "files": ["*.js", "locale", "icon.svg", "cordis.patch.yml", "README.md", "LICENSE"],
-  "dependencies": { "@deepseek-ai/schemastery": "3.19.0" },
-  "engines": { "dsh": "0.2.2-rc.5" },
-  "dsh": { "bundle": { "patch": "./cordis.patch.yml" } }
+  "exports": {
+    ".": "./index.js",
+    "./receipts": "./receipts.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "*.js",
+    "locale",
+    "icon.svg",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "@deepseek-ai/schemastery": "3.19.0"
+  },
+  "engines": {
+    "dsh": "0.2.2-rc.5"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
 }

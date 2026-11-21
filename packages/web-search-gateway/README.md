@@ -1,6 +1,6 @@
 # 网页搜索网关
 
-`@onlyfeng/dsh-web-search-gateway` 从 `0.2.0` 起使用带命名空间的包名。旧包 `dsh-web-search-gateway@0.1.3` 的 Git 提交是 `fc55dcda16b943c113027fd47c06404d3fbe2f39`，目录是 `packages/web-search-gateway`。
+`@onlyfeng/dsh-web-search-gateway` 从 `0.2.0` 起使用带命名空间的包名。公开仓库已于 2026-11-21 以干净历史重建，旧版本及其固定提交不再提供；升级时保留现有网关配置与搜索 provider 即可。
 
 `ctx.web` 的网关搜索 provider：让 dsh 的 `web_search` 走**模型网关自己的服务端搜索工具**（OpenAI Responses 的 `web_search`、Anthropic Messages 的 `web_search_20250305`），而不是 DeepSeek 的 Search API。许多自建/第三方网关只代理 `/messages`、`/responses` 这类聊天端点，没有 DeepSeek 专属的 `/v1/tools/search` 路由。
 
@@ -52,7 +52,7 @@ dsh 自带的两个 search provider 都有各自前提，网关没满足时就�
 
 安装前记下正在使用的搜索 provider，并备份当前 profile 的插件设置。先停用旧组合包，再启用新包。它们都使用 `web-search-gateway` 行 ID 和已有的 `idPrefix`。以行 ID 配置的网关地址与凭据引用可继续使用。若本地覆盖显式指定了旧模块 `name`，将该引用改成 `@onlyfeng/dsh-web-search-gateway`。
 
-在新包已接管该行后运行一次 `web_search`，确认当前 provider 返回摘要和来源，再移除旧包。切换失败时停用新包，重新启用备份记录中的旧版，并复查同一个 provider。移除旧包后仍可用上面的 `0.1.3` 固定提交重新安装。插件管理器提示需要重启时，在重启后复查实际搜索结果。
+在新包已接管该行后运行一次 `web_search`，确认当前 provider 返回摘要和来源，再移除旧包。切换失败时停用新包，重新启用备份记录中的旧版，并复查同一个 provider。若切换失败，按备份恢复原组合包；重建后不再提供旧版本固定提交。插件管理器提示需要重启时，在重启后复查实际搜索结果。
 
 ## 安装
 

@@ -1,1 +1,1 @@
-{ "meta": { "title": "GitLab merge requests", "description": "Read GitLab merge requests, patches and inline discussions in Change requests using glab. Access is read-only by default. Add an instance to discussionWriteHosts to reply, resolve or reopen existing threads with your GitLab permissions." } }
+{ "meta": { "title": "GitLab merge requests", "description": "Read merge requests, patches and inline discussions in Change requests using a signed-in glab CLI. Enable Change requests & worktrees and add your self-managed hostname to hosts." } }

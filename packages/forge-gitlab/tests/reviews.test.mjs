@@ -162,56 +162,6 @@ test('maps transport and malformed response failures without publishing partial 
   }
 })
 
-test('looks up only displayed discussions once, requiring REST evidence for resolution', async () => {
-  const rows = [
-    discussion('general', null), discussion('row', pos(), { resolvable: true }),
-    discussion('root', null, { notes: [note({ position: pos(), resolvable: true })] }),
-    discussion('unknown', pos(), { resolved: true }), discussion('beyond-cap'),
-  ]
-  const lookedUp = []
-  const permissions = async (actualRef, threads, signal) => {
-    lookedUp.push({ actualRef, ids: threads.map(t => t.id), aborted: signal.aborted })
-    return new Map(threads.map(t => [t.id, { reply: true, resolve: true }]))
-  }
-  const result = await review(rows, { maxThreads: 3, permissions })
-  assert.deepEqual(lookedUp, [{ actualRef: ref, ids: ['row', 'root', 'unknown'], aborted: false }])
-  assert.deepEqual(result.threads.map(t => [t.viewerCanReply, t.viewerCanResolve]), [[true, true], [true, true], [true, false]])
-  assert.equal(result.viewerCanReview, false)
-  assert.equal(result.truncated, true)
-})
-
-test('lookup failure or missing grants leave thread controls disabled and preserve the review', async () => {
-  const rows = [discussion('permitted-by-rest', pos(), { resolvable: true })]
-  const expected = await review(rows)
-  for (const permissions of [async () => { throw new Error('denied') }, async () => null,
-    async () => new Map([['permitted-by-rest', { reply: 'true', resolve: 1 }]])]) {
-    assert.deepEqual(await review(rows, { permissions }), expected)
-  }
-})
-
-test('the final head check follows permissions and discards grants on a moved head', async () => {
-  const order = []
-  const get = async (_host, path) => {
-    order.push(path)
-    if (path !== mr) return [discussion('t')]
-    return order.length === 1 ? meta : { sha: old }
-  }
-  const permissions = async () => { order.push('permissions'); return new Map([['t', { reply: true }]]) }
-  const result = await createReadReview({ get, permissions })(ref, head, new AbortController().signal)
-  assert.equal(result.code, 'stale')
-  assert.deepEqual(order, [mr, page(1), 'permissions', mr])
-})
-
-test('cancellation during permissions aborts the review before the final head check', async () => {
-  const controller = new AbortController()
-  const reason = new Error('cancelled')
-  const reads = []
-  const get = async (_host, path) => { reads.push(path); return path === mr ? meta : [discussion('t')] }
-  const permissions = async () => { controller.abort(reason); return new Map() }
-  await assert.rejects(createReadReview({ get, permissions })(ref, head, controller.signal), e => e === reason)
-  assert.deepEqual(reads, [mr, page(1)])
-})
-
 test('preserves caller cancellation before I/O and at each await, even when transport swallows it', async () => {
   for (const abortAt of [0, 1, 2, 3]) {
     const controller = new AbortController()
