@@ -6,7 +6,8 @@
         "zh": "GitLab 合并请求评审"
       },
       "dist-tags": {
-        "latest": "0.1.2"
+        "latest": "0.1.2",
+        "next": "0.2.0-rc.2"
       }
     },
     "@onlyfeng/dsh-forge-gitlab-project": {
@@ -76,6 +77,12 @@
       "version": "0.2.1",
       "path": "packages/web-search-gateway",
       "commit": "310384d484812f8c605ac818ed4cd52aa760d646"
+    },
+    {
+      "name": "@onlyfeng/dsh-forge-gitlab",
+      "version": "0.2.0-rc.2",
+      "path": "packages/forge-gitlab",
+      "commit": "0cce2725e9e5b5a8655cb93d571d4c4675112345"
     }
   ]
 }
