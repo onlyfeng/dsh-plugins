@@ -113,9 +113,22 @@
         ]
       },
       "dist-tags": {
-        "latest": "0.1.1"
+        "latest": "0.1.2"
       },
       "versions": [
+        {
+          "version": "0.1.2",
+          "publishTimestamp": 1795370216,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/onlyfeng/dsh-plugins",
+            "commit": "352baf2127ee48fd110992846a25b55b860b9d2f",
+            "path": "packages/forge-gitlab-project"
+          },
+          "engines": {
+            "dsh": "0.2.2-rc.5"
+          }
+        },
         {
           "version": "0.1.1",
           "publishTimestamp": 1795248575,

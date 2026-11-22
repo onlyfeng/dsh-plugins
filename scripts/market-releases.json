@@ -16,7 +16,7 @@
         "zh": "GitLab 项目合并请求选择器"
       },
       "dist-tags": {
-        "latest": "0.1.1"
+        "latest": "0.1.2"
       }
     },
     "@onlyfeng/dsh-ocr-team": {
@@ -95,6 +95,12 @@
       "version": "0.2.0-rc.3",
       "path": "packages/forge-gitlab",
       "commit": "255472ffbb4d41f1a3f82bc6c1b54cca0165cbf1"
+    },
+    {
+      "name": "@onlyfeng/dsh-forge-gitlab-project",
+      "version": "0.1.2",
+      "path": "packages/forge-gitlab-project",
+      "commit": "352baf2127ee48fd110992846a25b55b860b9d2f"
     }
   ]
 }
