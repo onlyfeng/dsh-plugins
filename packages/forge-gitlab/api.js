@@ -5,7 +5,7 @@ export function fail(code, message) { throw Object.assign(new Error(message), { 
 export function requireValue(value) { if (!value) fail('unavailable', 'GitLab returned an invalid or incomplete response.') }
 const nonempty = value => typeof value === 'string' && value.length > 0
 
-function safeUrl(value, host) {
+export function safeUrl(value, host) {
   if (typeof value !== 'string') return null
   try {
     const url = new URL(value)
@@ -13,13 +13,32 @@ function safeUrl(value, host) {
   } catch { return null }
 }
 
-function pipelineChecks(mr, host) {
-  const pipe = mr.head_pipeline
-  if (!positive(pipe?.id) || pipe.sha !== mr.sha) return []
-  const states = new Map([['success', 'success'], ['failed', 'failure'], ['canceled', 'cancelled'], ['skipped', 'skipped'], ['manual', 'neutral']])
-  return [{ name: `pipeline #${pipe.id}`, state: states.get(pipe.status) ?? 'pending', url: safeUrl(pipe.web_url, host),
-    workflow: null, startedAt: pipe.started_at ?? null, completedAt: pipe.finished_at ?? null, rerun: null }]
+export function mrPipeline(mr) {
+  const pipe = mr.head_pipeline ?? mr.pipeline
+  if (!positive(pipe?.id) || !sha(pipe.sha)) return null
+  if (pipe.sha === mr.sha) return pipe
+  // A merged-results pipeline tests a synthetic commit. Check its parents on detail read.
+  const prefix = `refs/merge-requests/${mr.iid}/`
+  return pipe.ref === `${prefix}merge` || pipe.ref === `${prefix}train` ? pipe : null
 }
+
+export function checkState(status) {
+  switch (status) {
+    case 'success': return 'success'
+    case 'failed': return 'failure'
+    case 'canceled': return 'cancelled'
+    case 'skipped': return 'skipped'
+    case 'manual': return 'neutral'
+    default: return 'pending'
+  }
+}
+
+export function pipelineCheck(pipe, host) {
+  return { name: `pipeline #${pipe.id}`, state: checkState(pipe.status), url: safeUrl(pipe.web_url, host),
+    workflow: null, startedAt: pipe.started_at ?? null, completedAt: pipe.finished_at ?? null, rerun: null }
+}
+
+export const rollupByState = { pending: 'pending', failure: 'failure', cancelled: 'failure', success: 'success', neutral: 'success', skipped: 'success' }
 
 function requestedReviewers(mr, host) {
   const reviewers = [], seen = new Set([mr.author?.username])
@@ -36,8 +55,8 @@ export function snapshotOf(ref, mr) {
   requireValue(nonempty(mr.title) && nonempty(mr.source_branch) && nonempty(mr.target_branch) && nonempty(mr.updated_at)
     && ['opened', 'merged', 'closed', 'locked'].includes(mr.state))
   const host = ref.repository.host
-  const checks = pipelineChecks(mr, host)
-  const rollupByState = { pending: 'pending', failure: 'failure', cancelled: 'failure', success: 'success', neutral: 'success', skipped: 'success' }
+  const pipe = mrPipeline(mr)
+  const checks = pipe && pipe.sha === mr.sha ? [pipelineCheck(pipe, host)] : []
   const checksRollup = checks.length ? rollupByState[checks[0].state] : 'none'
   const count = n => Number.isSafeInteger(n) && n >= 0 ? n : 0
   const conflict = mr.has_conflicts === true || ['conflict', 'conflicts'].includes(mr.detailed_merge_status)
@@ -51,7 +70,7 @@ export function snapshotOf(ref, mr) {
     mergeReady: false, mergeMethods: [], branchUpdates: [], reviewDecision: 'none',
     reviewers: requestedReviewers(mr, host), reviewersTruncated: true, canRequestReviews: false,
     checks, checksRollup,
-    checksTruncated: true, canRerunChecks: false, unresolvedThreads: 0, threadsTruncated: true,
+    checksTruncated: pipe !== null, canRerunChecks: false, unresolvedThreads: 0, threadsTruncated: true,
     closingIssues: [], closingIssuesTruncated: true, updatedAt: mr.updated_at, closedAt: mr.merged_at ?? mr.closed_at ?? null,
   }
 }

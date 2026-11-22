@@ -42,16 +42,20 @@ function classify(error, stderr) {
   return failure('unavailable', 'GitLab CLI could not complete the read')
 }
 
-/** Execute one size- and time-limited GET against an explicitly configured host. */
-export function createGitLabGet({ hosts, glabCommand, timeoutMs, maxOutputBytes }, run = execFile) {
+const diffStatsQuery = `query ForgeDiffStats($project: ID!, $iid: String!) {
+  project(fullPath: $project) { mergeRequest(iid: $iid) {
+    diffRefs { baseSha startSha headSha }
+    diffStatsSummary { additions deletions }
+  } }
+}`
+
+/** REST and one fixed GraphQL query, both sent as bounded GETs through the configured CLI. */
+export function createGitLabReads({ hosts, glabCommand, timeoutMs, maxOutputBytes }, run = execFile) {
   const allowed = new Set(normalizeHosts(hosts))
-  return async (host, endpoint, signal, format = 'json') => {
+  async function request(host, resourceArgs, signal, format = 'json') {
     signal?.throwIfAborted()
     if (!allowed.has(host)) throw failure('unavailable', 'GitLab host is not configured')
-    if (typeof endpoint !== 'string' || !/^(?:user$|version$|projects\/)/u.test(endpoint) || /[\x00-\x20\x7f\\#]/u.test(endpoint)) {
-      throw failure('unavailable', 'Invalid GitLab API resource')
-    }
-    const args = ['api', '--hostname', host, '--method', 'GET', endpoint]
+    const args = ['api', '--hostname', host, '--method', 'GET', ...resourceArgs]
     const options = {
       cwd: tmpdir(), windowsHide: true, shell: false, env: cliEnvironment(process.env),
       signal, timeout: timeoutMs, maxBuffer: maxOutputBytes, killSignal: 'SIGKILL', encoding: 'buffer',
@@ -73,7 +77,24 @@ export function createGitLabGet({ hosts, glabCommand, timeoutMs, maxOutputBytes 
       throw failure('unavailable', 'GitLab returned an unreadable response')
     }
   }
+  return {
+    async get(host, endpoint, signal, format) {
+      if (typeof endpoint !== 'string' || !/^(?:user$|version$|projects\/)/u.test(endpoint) || /[\x00-\x20\x7f\\#]/u.test(endpoint)) {
+        throw failure('unavailable', 'Invalid GitLab API resource')
+      }
+      return request(host, [endpoint], signal, format)
+    },
+    async getDiffStats(ref, signal) {
+      if (!validRef(ref, allowed)) throw failure('unavailable', 'Invalid GitLab merge request')
+      const { host, owner, name } = ref.repository
+      const variables = JSON.stringify({ project: `${owner}/${name}`, iid: String(ref.number) })
+      const result = await request(host, ['graphql', '-f', `query=${diffStatsQuery}`, '-f', `variables=${variables}`], signal)
+      return result?.errors?.length ? null : result?.data?.project?.mergeRequest
+    },
+  }
 }
+
+export const createGitLabGet = (config, run) => createGitLabReads(config, run).get
 
 const uncertain = () => failure('unknown', 'GitLab did not confirm the discussion action. Check the discussion before trying again.')
 

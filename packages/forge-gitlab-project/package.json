@@ -1,6 +1,6 @@
 {
   "name": "@onlyfeng/dsh-forge-gitlab-project",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "Choose open GitLab merge requests from the session project and link them to its change request panel",
   "type": "module",

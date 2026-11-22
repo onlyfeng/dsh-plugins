@@ -41,6 +41,21 @@ window.__ModuleLoader__.load({
       'state.added': '已加入 !{iid}，可在「代码审查和变更」中查看。',
       'state.empty': '该项目没有开放的合并请求。',
       'state.noSession': '请先打开一个会话。',
+      'error.noCheckout': '当前会话目录不在 Git 检出中。请打开项目目录，或输入 GitLab 项目地址。',
+      'error.changed': '检出或所选 MR 已变化，请刷新项目列表。',
+      'error.access': '请核对该 GitLab 实例的 glab 登录状态和项目读取权限。',
+      'error.read': '无法读取该 GitLab 项目，请检查连接后刷新列表。',
+      'error.denied': '当前会话的权限限制了 Git 检出读取。可保留现有权限，直接输入 GitLab 项目地址。',
+      'error.inspection': 'DSH 未能读取本地 Git 检出。「代码审查和变更」可查看具体原因，也可输入 GitLab 项目地址。',
+      'error.pending': '正在检查当前 Git 目录，请稍后刷新。',
+      'error.missing': '当前会话的工作树已缺失。请恢复工作树或选取现有检出。',
+      'error.moved': '会话的工作目录已变化。请刷新项目列表。',
+      'error.unknownProject': '当前检出的远端未关联到已配置的 GitLab 实例。请核对远端和允许的主机。',
+      'error.mismatch': '项目地址与当前检出的项目不一致，请核对后重新读取。',
+      'error.projectUrl': '请输入已配置 GitLab 实例上的 HTTPS 项目地址，只包含主机和项目路径。',
+      'label.projectUrl': 'GitLab 项目地址',
+      'action.readProject': '按地址读取',
+      'action.useCheckout': '使用当前检出',
       'action.refresh': '刷新',
       'action.retry': '重试',
       'action.track': '加入会话',
@@ -69,6 +84,21 @@ window.__ModuleLoader__.load({
       'state.added': 'Added !{iid}. Open Code review and changes to view it.',
       'state.empty': 'This project has no open merge requests.',
       'state.noSession': 'Open a session first.',
+      'error.noCheckout': 'This session directory is outside a Git checkout. Open the project directory or enter a GitLab project URL.',
+      'error.changed': 'The checkout or selected merge request changed. Refresh the list.',
+      'error.access': 'Check glab sign-in for this GitLab instance and permission to read the project.',
+      'error.read': 'Could not read this GitLab project. Check connectivity and refresh the list.',
+      'error.denied': 'Session permissions prevented Git inspection. Keep the current permissions and enter the GitLab project URL.',
+      'error.inspection': 'DSH could not inspect the checkout. See Code review and changes for the reason, or enter a GitLab project URL.',
+      'error.pending': 'Git inspection is in progress. Refresh after it finishes.',
+      'error.missing': 'The session worktree is missing. Restore it or select an existing checkout.',
+      'error.moved': 'The session directory changed. Refresh the project list.',
+      'error.unknownProject': 'No configured GitLab provider recognizes the checkout remote. Check the remote and allowed hosts.',
+      'error.mismatch': 'The URL points to a different project from the current checkout. Check the project address.',
+      'error.projectUrl': 'Enter the HTTPS address of a project on a configured GitLab host, with only its hostname and project path.',
+      'label.projectUrl': 'GitLab project URL',
+      'action.readProject': 'Read project',
+      'action.useCheckout': 'Use current checkout',
       'action.refresh': 'Refresh',
       'action.retry': 'Retry',
       'action.track': 'Add to session',
@@ -109,6 +139,7 @@ window.__ModuleLoader__.load({
         page: clampPage(page ?? FIRST_PAGE),
         items: [],
         project: null,
+        projectUrl: null,
         hasMore: false,
         scope: null,
         error: null,
@@ -193,7 +224,9 @@ window.__ModuleLoader__.load({
           return {
             ...state,
             status: 'loading',
+            project: null,
             page: clampPage(event.page ?? state.page),
+            projectUrl: event.projectUrl === undefined ? state.projectUrl : event.projectUrl,
             error: null,
             scope: null,
             epoch: state.epoch + 1,
@@ -279,7 +312,7 @@ window.__ModuleLoader__.load({
       if (item.tracked || entry?.status === 'done') return { label: t('action.tracked'), disabled: true, failure: null };
       if (entry?.status === 'pending') return { label: t('action.tracking'), disabled: true, failure: null };
       const failure = entry?.status === 'failed'
-        ? t('error.trackFailed', { reason: entry.text ?? t('error.unexpected') })
+        ? t('error.trackFailed', { reason: errorText({ kind: 'refused', text: entry.text }, t) })
         : null;
       return { label: t('action.track'), disabled: !canTrack(state, item), failure };
     }
@@ -292,7 +325,10 @@ window.__ModuleLoader__.load({
      * @returns {string} the text to draw.
      */
     function errorText(error, t) {
-      if (error.kind === 'refused' && typeof error.text === 'string' && error.text.length > 0) return error.text;
+      if (error.kind === 'refused' && typeof error.text === 'string' && error.text.length > 0) {
+        const code = /^\[gitlab-project:([a-zA-Z]+)\]/.exec(error.text)?.[1];
+        return code && Object.hasOwn(en, `error.${code}`) ? t(`error.${code}`) : error.text;
+      }
       if (error.kind === 'unavailable') return t('error.unavailable');
       return t('error.unexpected');
     }
@@ -316,6 +352,10 @@ window.__ModuleLoader__.load({
 .ofgp-tag { padding: 0 6px; border-radius: 4px; background: var(--dsw-alias-interactive-bg-hover);
   color: var(--dsw-alias-label-secondary); font-size: 12px; }
 .ofgp-row-foot { display: flex; align-items: center; gap: 8px; }
+.ofgp-address { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; }
+.ofgp-address label { display: flex; flex: 1 1 14em; flex-direction: column; gap: 4px; min-width: 0; }
+.ofgp-address input { font: inherit; color: var(--dsw-alias-label-primary); background: transparent;
+  border: 1px solid var(--dsw-alias-border-l2); border-radius: 4px; padding: 5px 8px; min-width: 0; }
 .ofgp-failure { color: var(--dsw-alias-state-error-primary); font-size: 12px; overflow-wrap: anywhere; }
 .ofgp-notice { padding: 16px 12px; color: var(--dsw-alias-label-secondary); overflow-wrap: anywhere; }
 .ofgp-foot { display: flex; align-items: center; gap: 8px; padding: 8px 12px;
@@ -385,6 +425,8 @@ window.__ModuleLoader__.load({
       const sessionId = props.sessionId ?? null;
       const [state, dispatch] = React.useReducer(reduce, undefined, () => initialState(tab.navigation.params?.page));
       const epoch = state.epoch;
+      const [address, setAddress] = React.useState('');
+      const [invalidAddress, setInvalidAddress] = React.useState(false);
 
       // One read per (session, page, explicit refresh); its answer is dropped unless it is still current.
       React.useEffect(() => {
@@ -394,7 +436,7 @@ window.__ModuleLoader__.load({
         const abort = () => { controller.abort(); };
         tab.signal?.addEventListener('abort', abort);
         void (async () => {
-          const answer = await listMergeRequests(sessionId, state.page, controller.signal);
+          const answer = await listMergeRequests(sessionId, state.page, controller.signal, state.projectUrl);
           if (!live) return;
           if (answer.kind === 'listed') dispatch({ type: 'listed', epoch, listing: answer.listing });
           else dispatch({ type: 'failed', epoch, kind: answer.kind, text: answer.text });
@@ -404,7 +446,7 @@ window.__ModuleLoader__.load({
           tab.signal?.removeEventListener('abort', abort);
           controller.abort();
         };
-      }, [sessionId, state.page, epoch, listMergeRequests, tab.signal]);
+      }, [sessionId, state.page, epoch, listMergeRequests, tab.signal, state.projectUrl]);
 
 
       const refresh = React.useCallback(() => { dispatch({ type: 'load', page: state.page }); }, [state.page]);
@@ -428,6 +470,22 @@ window.__ModuleLoader__.load({
         return h('div', { className: 'ofgp-root' }, h(Styles), h('p', { className: 'ofgp-notice' }, t('state.noSession')));
       }
 
+      const offerAddress = Boolean(state.projectUrl) || /^\[gitlab-project:(?:denied|inspection|noCheckout|projectUrl)\]/.test(state.error?.text ?? '');
+      const addressForm = offerAddress && h('form', { className: 'ofgp-notice ofgp-address', onSubmit: event => {
+        event.preventDefault();
+        const url = address.trim();
+        // Keep credentials, query strings and fragments out of the session command.
+        if (!validAddress(url)) { setInvalidAddress(true); return; }
+        setInvalidAddress(false);
+        dispatch({ type: 'load', page: FIRST_PAGE, projectUrl: url });
+      } }, h('label', null, t('label.projectUrl'), h('input', { type: 'url', required: true,
+        value: address, maxLength: 2048, placeholder: 'https://gitlab.example.org/group/project',
+        onChange: event => { setAddress(event.target.value); setInvalidAddress(false); } })),
+        h('button', { type: 'submit', className: 'ofgp-button' }, t('action.readProject')),
+        state.projectUrl && h('button', { type: 'button', className: 'ofgp-button', onClick: () => {
+          setInvalidAddress(false); dispatch({ type: 'load', page: FIRST_PAGE, projectUrl: null });
+        } }, t('action.useCheckout')),
+        invalidAddress && h('p', { role: 'alert', className: 'ofgp-failure' }, t('error.projectUrl')));
       const body = state.status === 'loading'
         ? h('p', { className: 'ofgp-notice' }, t('state.loading'))
         : state.status === 'failed'
@@ -448,7 +506,7 @@ window.__ModuleLoader__.load({
           h('button', {
             type: 'button', className: 'ofgp-button', onClick: refresh, disabled: state.status === 'loading',
           }, t('action.refresh'))),
-        body,
+        addressForm, body,
         state.status === 'ready' && state.truncated ? h('div', { className: 'ofgp-notice' }, t('state.capped')) : null,
         h('div', { className: 'ofgp-foot' },
           h('button', {
@@ -471,6 +529,10 @@ window.__ModuleLoader__.load({
      * @param {object} ctx - the plugin context carrying the command Remote.
      * @returns {object} `{ listMergeRequests, trackMergeRequest }`.
      */
+    function validAddress(url) {
+      return typeof url === 'string' && url.length <= 2048 && /^https:\/\/[a-z0-9.-]+(?::[0-9]+)?(?:\/[a-z0-9_][a-z0-9_.-]*){2,}\/?$/i.test(url);
+    }
+
     function createTransport(ctx) {
       /**
        * Run one slash command for a Session and return its settled outcome.
@@ -506,8 +568,10 @@ window.__ModuleLoader__.load({
          * @param {AbortSignal} signal - cancellation of the read.
          * @returns {Promise<object>} the listing or the failure to draw.
          */
-        listMergeRequests: async (sessionId, page, signal) => {
-          const outcome = await run(sessionId, `/gitlab-project list ${clampPage(page)}`, signal);
+        listMergeRequests: async (sessionId, page, signal, projectUrl) => {
+          if (projectUrl && !validAddress(projectUrl)) return { kind: 'refused', text: '[gitlab-project:projectUrl]' };
+          const source = projectUrl ? ` project ${projectUrl}` : '';
+          const outcome = await run(sessionId, `/gitlab-project list ${clampPage(page)}${source}`, signal);
           if (outcome.kind !== 'success') return outcome;
           const parsed = parseListing(outcome.text);
           return parsed.ok ? { kind: 'listed', listing: parsed.value } : { kind: 'unexpected', text: null };

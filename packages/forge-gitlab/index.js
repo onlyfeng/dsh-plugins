@@ -1,5 +1,5 @@
 import z from './runtime/schema.js'
-import { createDiscussionTransport, createGitLabGet, normalizeHosts } from './glab.js'
+import { createDiscussionTransport, createGitLabReads, normalizeHosts } from './glab.js'
 import { createThreadPermissions } from './permissions.js'
 import { createWriteReview } from './thread-action.js'
 import { createGitLabProvider } from './provider.js'
@@ -26,7 +26,7 @@ export function apply(ctx, config) {
   if (!config.glabCommand.trim()) throw new Error('glabCommand must identify the GitLab CLI')
   const writeHosts = config.discussionWriteHosts.length ? normalizeHosts(config.discussionWriteHosts) : []
   if (writeHosts.some(host => !hosts.includes(host))) throw new Error('discussionWriteHosts must be a subset of hosts')
-  const get = createGitLabGet({ ...config, hosts })
+  const { get, getDiffStats } = createGitLabReads({ ...config, hosts })
   let permissions, writeReview
   if (writeHosts.length) {
     const transport = createDiscussionTransport({ ...config, hosts: writeHosts })
@@ -36,5 +36,5 @@ export function apply(ctx, config) {
   }
   const readReview = createReadReview({ get, maxThreads: config.maxThreads, permissions })
   // ForgeService.register owns cancellation, cleanup and in-flight reads on the calling fiber.
-  ctx.forge.register(createGitLabProvider({ hosts, get, changeRequestKey, readReview, writeReview }))
+  ctx.forge.register(createGitLabProvider({ hosts, get, getDiffStats, changeRequestKey, readReview, writeReview }))
 }

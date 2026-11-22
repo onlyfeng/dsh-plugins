@@ -465,3 +465,21 @@ test('styles reference only theme tokens, never literal colours', async () => {
   assert.equal(styles.match(/#[0-9a-f]{3,8}\b/gi), null, 'no literal hex colour belongs in panel styles');
   assert.equal(styles.match(/\brgba?\(/gi), null, 'no literal rgb colour belongs in panel styles');
 });
+
+test('localizes checkout failures and sends explicit project addresses only after validation', async () => {
+  assert.equal(errorText({ kind: 'refused', text: '[gitlab-project:denied] Git read failed' }, t), 'error.denied');
+  const { ctx, lines } = remote(success(payload()));
+  const api = createTransport(ctx), url = 'https://forge.example.test/group/project';
+  assert.equal((await api.listMergeRequests('s', 1, undefined, 'https://user@forge.example.test/g/r')).kind, 'refused');
+  assert.equal(lines.length, 0);
+  assert.equal((await api.listMergeRequests('s', 1, undefined, url)).kind, 'listed');
+  assert.equal(lines[0].line, `/gitlab-project list 1 project ${url}`);
+});
+
+test('starting an address lookup clears the old project until a new listing is confirmed', () => {
+  const old = { ...initialState(1), status: 'ready', project: 'group/old' };
+  const loading = reduce(old, { type: 'load', projectUrl: 'https://forge.example.test/group/new' });
+  assert.equal(loading.project, null);
+  assert.equal(reduce(loading, { type: 'failed', epoch: loading.epoch, kind: 'refused', text: '[gitlab-project:access]' }).project, null);
+  assert.equal(errorText({ kind: 'refused', text: '[gitlab-project:access] Sign-in required' }, t), 'error.access');
+});

@@ -32,10 +32,23 @@
         ]
       },
       "dist-tags": {
-        "latest": "0.1.2",
-        "next": "0.2.0-rc.2"
+        "latest": "0.1.3",
+        "next": "0.2.0-rc.3"
       },
       "versions": [
+        {
+          "version": "0.2.0-rc.3",
+          "publishTimestamp": 1795369198,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/onlyfeng/dsh-plugins",
+            "commit": "255472ffbb4d41f1a3f82bc6c1b54cca0165cbf1",
+            "path": "packages/forge-gitlab"
+          },
+          "engines": {
+            "dsh": "0.2.2-rc.3 || 0.2.2-rc.5"
+          }
+        },
         {
           "version": "0.2.0-rc.2",
           "publishTimestamp": 1795251873,
@@ -43,6 +56,19 @@
             "type": "git",
             "url": "https://github.com/onlyfeng/dsh-plugins",
             "commit": "0cce2725e9e5b5a8655cb93d571d4c4675112345",
+            "path": "packages/forge-gitlab"
+          },
+          "engines": {
+            "dsh": "0.2.2-rc.3 || 0.2.2-rc.5"
+          }
+        },
+        {
+          "version": "0.1.3",
+          "publishTimestamp": 1795368993,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/onlyfeng/dsh-plugins",
+            "commit": "9f27ef3c4ef7f97e1c453fa8851cd974af69364d",
             "path": "packages/forge-gitlab"
           },
           "engines": {
@@ -87,9 +113,22 @@
         ]
       },
       "dist-tags": {
-        "latest": "0.1.1"
+        "latest": "0.1.2"
       },
       "versions": [
+        {
+          "version": "0.1.2",
+          "publishTimestamp": 1795370216,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/onlyfeng/dsh-plugins",
+            "commit": "352baf2127ee48fd110992846a25b55b860b9d2f",
+            "path": "packages/forge-gitlab-project"
+          },
+          "engines": {
+            "dsh": "0.2.2-rc.5"
+          }
+        },
         {
           "version": "0.1.1",
           "publishTimestamp": 1795248575,

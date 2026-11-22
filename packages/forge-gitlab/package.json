@@ -1,6 +1,6 @@
 {
   "name": "@onlyfeng/dsh-forge-gitlab",
-  "version": "0.2.0-rc.2",
+  "version": "0.2.0-rc.3",
   "private": true,
   "description": "Read GitLab merge requests and optionally reply to, resolve, or reopen discussions in the DSH change request panel",
   "type": "module",
@@ -10,9 +10,9 @@
   "repository": { "type": "git", "url": "git+https://github.com/onlyfeng/dsh-plugins.git", "directory": "packages/forge-gitlab" },
   "keywords": ["deepseek-harness", "gitlab", "forge", "merge-request", "code-review"],
   "main": "index.js",
-  "exports": { ".": "./index.js", "./package.json": "./package.json", "./locale/*.json": "./locale/*.json", "./icon": "./icon.svg" },
+  "exports": { ".": "./index.js", "./client": "./client.js", "./package.json": "./package.json", "./locale/*.json": "./locale/*.json", "./icon": "./icon.svg" },
   "files": ["*.js", "runtime", "locale", "icon.svg", "cordis.patch.yml", "README.md", "LICENSE", "LICENSE.upstream"],
   "engines": { "dsh": "0.2.2-rc.3 || 0.2.2-rc.5" },
-  "dsh": { "bundle": { "patch": "./cordis.patch.yml" } },
+  "dsh": { "bundle": { "patch": "./cordis.patch.yml" }, "client": { "platform": "web", "inject": ["@deepseek-ai/dsh-client-locale"] } },
   "dependencies": { "@deepseek-ai/schemastery": "3.19.0" }
 }

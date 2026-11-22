@@ -53,3 +53,31 @@ test('checks provider registration and rechecks the checkout after reading', asy
 test('cancellation starts no GitLab read', async () => {
   const f = setup(); const reason = Error('fixture cancelled'); await assert.rejects(f.run('list', 0, AbortSignal.abort(reason)), e => e === reason); assert.deepEqual(f.calls, [])
 })
+
+test('checkout failures have distinct diagnostics and never use stale repository metadata', async () => {
+  for (const [checkout, code] of [[{ state: 'none' }, 'noCheckout'], [{ state: 'pending' }, 'pending'],
+    [{ state: 'failed', message: 'Permission denied' }, 'denied'], [{ state: 'failed', message: 'Git timed out' }, 'inspection']]) {
+    const f = setup(); f.state.checkout = checkout
+    const r = await f.run('list'); assert.equal(r.kind, 'error'); assert.ok(r.text.includes(`[gitlab-project:${code}]`)); assert.equal(f.calls.length, 0)
+  }
+  const nested = setup(); nested.dir = nested.state.directory = '/fixtures/demo/src'; nested.state.worktree.blocker = 'outside-writable-root'
+  assert.equal((await success(nested.run('list'))).items.length, 1)
+  nested.state.worktree.missing = {}; assert.match((await nested.run('list')).text, /gitlab-project:missing/)
+  nested.state.worktree.missing = null; nested.dir = '/fixtures/another'; assert.match((await nested.run('list')).text, /gitlab-project:moved/)
+})
+test('an explicit allowed project works with failed checkout inspection and keeps track leases session-scoped', async () => {
+  const f = setup(), address = `https://${repo.host}/${repo.owner}/${repo.name}`
+  f.state.checkout = { state: 'failed', message: 'sandbox policy' }; f.state.repository = null
+  const list = await success(f.run(`list 1 project ${address}`)); assert.equal(list.projectPath, 'synthetic/group/demo')
+  const track = `track ${list.scope} ${fork.iid}`
+  assert.equal((await f.run(track, 1)).kind, 'error')
+  assert.equal((await success(f.run(track))).bound, true)
+  f.state.checkout = { state: 'ready', checkout: { root: f.dir } }; f.state.repository = { ...repo, name: 'other' }
+  assert.match((await f.run(track)).text, /gitlab-project:mismatch/); assert.equal(f.tracks.length, 1)
+})
+test('invalid project addresses cannot start a host request', async () => {
+  const f = setup(); f.state.checkout = { state: 'failed' }
+  for (const address of ['https://unlisted.example.test/g/r', `https://user@${repo.host}/g/r`, `https://${repo.host}/g/r?key=secret`,
+    `https://${repo.host}/g/../r`, `https://${repo.host}/g/r/-/merge_requests/5`]) assert.equal((await f.run(`list 1 project ${address}`)).kind, 'error')
+  assert.equal(f.calls.length, 0)
+})

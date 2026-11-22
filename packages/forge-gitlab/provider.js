@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 import { positive, sha, filePath, validRepo, validRef, projectPath, mrPath, mrUrl, repositoryFromRemote, changeRequestFromUrl } from './urls.js'
-import { snapshotOf, patchOf, fail, requireValue } from './api.js'
+import { patchOf, fail, requireValue } from './api.js'
+import { createOverview, completeChecks } from './overview.js'
 
 const failureCodes = new Set(['not-found', 'unauthenticated', 'unavailable', 'stale', 'unsupported', 'too-large'])
 function sameVersion(mr, head, base) {
@@ -24,7 +25,8 @@ async function read(signal, operation) {
 }
 
 const unsupportedChange = async () => ({ code: 'failed', message: 'Mark-ready and merge actions are not supported by this provider.' })
-export function createGitLabProvider({ hosts, get, readReview, writeReview, changeRequestKey }) {
+export function createGitLabProvider({ hosts, get, getDiffStats, readReview, writeReview, changeRequestKey }) {
+  const overview = createOverview(getDiffStats)
   const allowed = new Set(hosts.map(host => host.toLowerCase()))
   const refGuard = ref => requireValue(validRef(ref, allowed))
   async function readMr(ref, signal) {
@@ -49,8 +51,11 @@ export function createGitLabProvider({ hosts, get, readReview, writeReview, chan
     },
     async fetch(refs, signal) {
       const results = new Map()
-      for (const ref of refs) results.set(changeRequestKey(ref), await read(signal, async () => snapshotOf(ref, await readMr(ref, signal))))
+      for (const ref of refs) results.set(changeRequestKey(ref), await read(signal, async () => overview(ref, await readMr(ref, signal), signal)))
       return results
+    },
+    fetchChecks(ref, signal) {
+      return read(signal, () => completeChecks(ref, signal, { get, readMr, overview }))
     },
     async findByHead(repository, branch, signal) {
       signal?.throwIfAborted()

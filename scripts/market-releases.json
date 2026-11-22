@@ -6,8 +6,8 @@
         "zh": "GitLab 合并请求评审"
       },
       "dist-tags": {
-        "latest": "0.1.2",
-        "next": "0.2.0-rc.2"
+        "latest": "0.1.3",
+        "next": "0.2.0-rc.3"
       }
     },
     "@onlyfeng/dsh-forge-gitlab-project": {
@@ -16,7 +16,7 @@
         "zh": "GitLab 项目合并请求选择器"
       },
       "dist-tags": {
-        "latest": "0.1.1"
+        "latest": "0.1.2"
       }
     },
     "@onlyfeng/dsh-ocr-team": {
@@ -83,6 +83,24 @@
       "version": "0.2.0-rc.2",
       "path": "packages/forge-gitlab",
       "commit": "0cce2725e9e5b5a8655cb93d571d4c4675112345"
+    },
+    {
+      "name": "@onlyfeng/dsh-forge-gitlab",
+      "version": "0.1.3",
+      "path": "packages/forge-gitlab",
+      "commit": "9f27ef3c4ef7f97e1c453fa8851cd974af69364d"
+    },
+    {
+      "name": "@onlyfeng/dsh-forge-gitlab",
+      "version": "0.2.0-rc.3",
+      "path": "packages/forge-gitlab",
+      "commit": "255472ffbb4d41f1a3f82bc6c1b54cca0165cbf1"
+    },
+    {
+      "name": "@onlyfeng/dsh-forge-gitlab-project",
+      "version": "0.1.2",
+      "path": "packages/forge-gitlab-project",
+      "commit": "352baf2127ee48fd110992846a25b55b860b9d2f"
     }
   ]
 }

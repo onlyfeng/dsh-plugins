@@ -9,7 +9,7 @@
 3. 将分发包完整解压到一个长期保留的目录。在插件页选择「添加插件」并指定内含 `package.json` 的目录。也可以使用 Desktop 自带的 CLI。
 
 ```powershell
-dsh plugin --profile desktop add 'C:\DSH-Plugins\forge-gitlab-0.2.0-rc.2'
+dsh plugin --profile desktop add 'C:\DSH-Plugins\forge-gitlab-0.2.0-rc.3'
 ```
 
 默认识别 `gitlab.com`。自建 GitLab 在本机 profile 的 `cordis.patch.yml` 中覆盖已有行。`hosts` 是完整允许列表，示例使用保留域名。
@@ -34,11 +34,15 @@ dsh plugin --profile desktop add 'C:\DSH-Plugins\forge-gitlab-0.2.0-rc.2'
 - **评审讨论**：读取 GitLab Discussions API 的行内及文件讨论，保留用户回复和已解决状态。旧提交上的位置不会被画到当前提交。普通 MR 留言、系统事件、图片坐标及无法可靠定位的范围不在该面板列表中。达到线程上限或分页扫描上限时返回 `truncated`。
 - **权限**：`discussionWriteHosts` 默认为空。此时只用 GET 读取数据，面板提供只读操作。
 
-状态轮询展示 MR 返回的 head pipeline 和请求评审人。GitLab 省略行数统计时，rc.3 面板的数值字段显示为 0，应以完整 diff 为准。折叠或被服务端截断的文件，以及首版无法表达的二进制或仅元数据变更，会让本次补丁读取返回明确的失败状态。普通留言、审批规则和全部流水线状态可在 GitLab 页面查看。
+概览优先采用 GitLab 的增删行统计。REST 响应缺少统计时，插件通过固定的 GraphQL GET 读取同一 diff 版本的行数。旧实例未提供统计时，打开「变更」可查看补丁的实际行数。折叠、截断或无法表达的文件会在读取补丁时给出错误。
+
+概览显示当前 head 的流水线状态。展开检查时，插件分页读取该流水线的作业和触发作业。合并结果流水线需要先核对临时提交的父提交。没有当前流水线时，检查清单显示 0 项。审批规则和下游流水线的内部作业请在 GitLab 查看。
+
+Desktop `0.2.2-rc.5` 用户可在「设置 → 通用 → 语言」选择「中文（代码托管平台）」。线程卡片和讨论列表的链接都会显示「在代码托管平台查看」，分别打开该条讨论和整个 MR。
 
 ## 在线程中回复、解决和重新打开
 
-在本机插件行的 `config` 中将 `discussionWriteHosts` 设置为允许写入的域名列表。每个域名也必须包含在 `hosts` 中。使用能在该项目发表评论的 `glab` 账号；令牌写入需要 GitLab 的 `api` scope。在变更请求面板打开目标 MR 的「变更」，展开线程，核对目标和正文后点击回复；解决和重新打开按钮会直接提交所选状态。
+在本机插件行的 `config` 中将 `discussionWriteHosts` 设置为允许写入的域名列表。每个域名也必须包含在 `hosts` 中。使用能在该项目发表评论的 `glab` 账号；令牌写入需要 GitLab 的 `api` scope。在变更请求面板打开目标 MR 的「变更」，展开线程，核对目标和正文后点击回复；展开线程，在回复框下方操作行点击「解决讨论」。按钮切换为「取消解决」，再次点击会重开同一条讨论；「已审阅」记录文件的阅读进度。
 
 面板通过只读 GraphQL 查询核实当前账号在 MR 和开帖评论上的权限，按讨论 ID 和开帖评论 ID 匹配结果。权限查询有页数上限；未取得明确权限的线程保留只读展示。写入时插件重新读取目标线程、权限和当前 head。head 已变化会返回 `stale`。GitLab 的讨论写接口不接受预期 head 参数，最后一次查询与实际写入之间仍有并发窗口。
 
@@ -53,7 +57,7 @@ OCR 评审判断适合放在单独的工作流插件中。它按项目、MR 和 
 ```sh
 pnpm install --frozen-lockfile
 pnpm test
-node scripts/package-forge-gitlab.mjs dist/forge-gitlab-0.2.0-rc.2
+node scripts/package-forge-gitlab.mjs dist/forge-gitlab-0.2.0-rc.3
 ```
 
 `tests/` 使用合成数据，可离线运行。`scripts/verify-forge-gitlab.mjs` 使用 Desktop 提供的 Electron Node 运行时，挂载真正的 `ForgeService` 并检查插件卸载。添加 `--live` 并在本机设置 `FORGE_SMOKE_MR_URL` 后，测试会对指定 MR 做只读验证，输出仅包含状态和计数。
