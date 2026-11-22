@@ -1,1 +1,1 @@
-{ "meta": { "title": "GitLab 合并请求", "description": "在变更请求面板使用本机 glab 查看 GitLab MR、补丁和评审讨论。默认只读。在 discussionWriteHosts 中配置实例后，可按 GitLab 账号权限回复、解决或重新打开已有线程。" } }
+{ "meta": { "title": "GitLab 合并请求", "description": "在变更请求面板通过本机 glab 只读查看 GitLab MR、补丁和行内评审讨论。启用变更请求与工作树，并在 hosts 中添加自建实例域名。" } }

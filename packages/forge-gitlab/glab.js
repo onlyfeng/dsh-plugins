@@ -1,8 +1,6 @@
 import { execFile } from 'node:child_process'
 import { tmpdir } from 'node:os'
-import { DISCUSSION_PERMISSIONS_QUERY } from './permissions.js'
-import { validateThreadWrite } from './thread-action.js'
-import { mrPath, validRef } from './urls.js'
+import { validRef } from './urls.js'
 
 const hostPattern = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)*[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?::[1-9]\d{0,4})?$/i
 
@@ -42,16 +40,20 @@ function classify(error, stderr) {
   return failure('unavailable', 'GitLab CLI could not complete the read')
 }
 
-/** Execute one size- and time-limited GET against an explicitly configured host. */
-export function createGitLabGet({ hosts, glabCommand, timeoutMs, maxOutputBytes }, run = execFile) {
+const diffStatsQuery = `query ForgeDiffStats($project: ID!, $iid: String!) {
+  project(fullPath: $project) { mergeRequest(iid: $iid) {
+    diffRefs { baseSha startSha headSha }
+    diffStatsSummary { additions deletions }
+  } }
+}`
+
+/** REST and one fixed GraphQL query, both sent as bounded GETs through the configured CLI. */
+export function createGitLabReads({ hosts, glabCommand, timeoutMs, maxOutputBytes }, run = execFile) {
   const allowed = new Set(normalizeHosts(hosts))
-  return async (host, endpoint, signal, format = 'json') => {
+  async function request(host, resourceArgs, signal, format = 'json') {
     signal?.throwIfAborted()
     if (!allowed.has(host)) throw failure('unavailable', 'GitLab host is not configured')
-    if (typeof endpoint !== 'string' || !/^(?:user$|version$|projects\/)/u.test(endpoint) || /[\x00-\x20\x7f\\#]/u.test(endpoint)) {
-      throw failure('unavailable', 'Invalid GitLab API resource')
-    }
-    const args = ['api', '--hostname', host, '--method', 'GET', endpoint]
+    const args = ['api', '--hostname', host, '--method', 'GET', ...resourceArgs]
     const options = {
       cwd: tmpdir(), windowsHide: true, shell: false, env: cliEnvironment(process.env),
       signal, timeout: timeoutMs, maxBuffer: maxOutputBytes, killSignal: 'SIGKILL', encoding: 'buffer',
@@ -73,85 +75,21 @@ export function createGitLabGet({ hosts, glabCommand, timeoutMs, maxOutputBytes 
       throw failure('unavailable', 'GitLab returned an unreadable response')
     }
   }
-}
-
-const uncertain = () => failure('unknown', 'GitLab did not confirm the discussion action. Check the discussion before trying again.')
-
-function writeError(err, stderr) {
-  if (['ENOENT', 'EACCES', 'EPERM', 'ENOEXEC'].includes(err.code) && err.syscall?.startsWith('spawn')) {
-    return failure('failed', 'The GitLab CLI could not start.')
-  }
-  if (err.killed || err.signal || err.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER') return uncertain()
-  const statuses = [...String(stderr).matchAll(/\bHTTP\s+(\d{3})\b/gi)].map(match => match[1])
-  const definite = /^(?:400|401|403|404|405|409|410|413|415|422|429)$/
-  return statuses.length && statuses.every(status => definite.test(status)) ? failure('failed', 'GitLab refused the discussion action.') : uncertain()
-}
-
-/** CLI transport for a permission lookup and two existing-thread endpoints. */
-export function createDiscussionTransport({ hosts, glabCommand, timeoutMs, maxOutputBytes }, run = execFile) {
-  const allowed = new Set(normalizeHosts(hosts))
-
-  async function request(host, method, endpoint, payload, signal, writing) {
-    if (signal?.aborted && writing) throw failure('failed', 'The discussion action was cancelled before sending.')
-    signal?.throwIfAborted()
-    const args = ['api', '--hostname', host, '--method', method, '--header', 'Content-Type: application/json', '--input', '-', endpoint]
-    const options = { cwd: tmpdir(), windowsHide: true, shell: false, env: cliEnvironment(process.env), signal,
-      timeout: timeoutMs, maxBuffer: maxOutputBytes, killSignal: 'SIGKILL', encoding: 'buffer' }
-    const body = JSON.stringify(payload)
-    const bytes = await new Promise((resolve, reject) => {
-      let child, inputError = false
-      try {
-        child = run(glabCommand, args, options, (err, stdout, stderr) => {
-          if (signal?.aborted) reject(writing ? uncertain() : signal.reason)
-          else if (err) reject(writing ? writeError(err, stderr) : classify(err, stderr))
-          else if (inputError) reject(writing ? uncertain() : failure('unavailable', 'Could not send the permission query.'))
-          else resolve(stdout)
-        })
-      } catch {
-        reject(failure(writing ? 'failed' : 'unavailable', 'The GitLab CLI could not start.'))
-        return
-      }
-      try {
-        child.stdin.once('error', () => { inputError = true })
-        child.stdin.end(body, 'utf8')
-      } catch {
-        reject(writing ? uncertain() : failure('unavailable', 'Could not send the permission query.'))
-      }
-    })
-    if (signal?.aborted && writing) throw uncertain()
-    signal?.throwIfAborted()
-    try {
-      const result = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes))
-      if (!result || typeof result !== 'object' || Array.isArray(result)) throw new Error()
-      return result
-    } catch {
-      throw writing ? uncertain() : failure('unavailable', 'GitLab returned an unreadable permission response.')
-    }
-  }
-
   return {
-    async query(host, document, variables, signal) {
-      if (!allowed.has(host) || document !== DISCUSSION_PERMISSIONS_QUERY || typeof variables?.project !== 'string'
-          || typeof variables.iid !== 'string' || !/^[1-9]\d*$/.test(variables.iid)
-          || (variables.after !== undefined && (typeof variables.after !== 'string' || !variables.after.length || variables.after.length > 16_384))) {
-        throw failure('failed', 'Invalid GitLab permission query.')
+    async get(host, endpoint, signal, format) {
+      if (typeof endpoint !== 'string' || !/^(?:user$|version$|projects\/)/u.test(endpoint) || /[\x00-\x20\x7f\\#]/u.test(endpoint)) {
+        throw failure('unavailable', 'Invalid GitLab API resource')
       }
-      const parts = variables.project.split('/')
-      const name = parts.pop()
-      if (!validRef({ repository: { forge: 'gitlab', host, owner: parts.join('/'), name }, number: Number(variables.iid) }, allowed)) {
-        throw failure('failed', 'Invalid GitLab permission query.')
-      }
-      const args = { project: variables.project, iid: variables.iid, ...(variables.after !== undefined && { after: variables.after }) }
-      return request(host, 'POST', 'graphql', { query: document, variables: args }, signal, false)
+      return request(host, [endpoint], signal, format)
     },
-    async mutate(ref, write, signal) {
-      if (!validRef(ref, allowed)) throw failure('failed', 'Invalid GitLab discussion target.')
-      const invalid = validateThreadWrite(write)
-      if (invalid) throw failure('failed', invalid.message)
-      const path = `${mrPath(ref)}/discussions/${write.thread}`
-      return write.kind === 'reply'
-        ? request(ref.repository.host, 'POST', `${path}/notes`, { body: write.body }, signal, true)
-        : request(ref.repository.host, 'PUT', path, { resolved: write.resolved }, signal, true)
+    async getDiffStats(ref, signal) {
+      if (!validRef(ref, allowed)) throw failure('unavailable', 'Invalid GitLab merge request')
+      const { host, owner, name } = ref.repository
+      const variables = JSON.stringify({ project: `${owner}/${name}`, iid: String(ref.number) })
+      const result = await request(host, ['graphql', '-f', `query=${diffStatsQuery}`, '-f', `variables=${variables}`], signal)
+      return result?.errors?.length ? null : result?.data?.project?.mergeRequest
     },
   }
 }
+
+export const createGitLabGet = (config, run) => createGitLabReads(config, run).get
