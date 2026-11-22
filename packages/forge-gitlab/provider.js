@@ -24,8 +24,8 @@ async function read(signal, operation) {
   }
 }
 
-const readOnly = async () => ({ code: 'failed', message: 'This provider supports read operations only.' })
-export function createGitLabProvider({ hosts, get, getDiffStats, readReview, changeRequestKey }) {
+const unsupportedChange = async () => ({ code: 'failed', message: 'Mark-ready and merge actions are not supported by this provider.' })
+export function createGitLabProvider({ hosts, get, getDiffStats, readReview, writeReview, changeRequestKey }) {
   const overview = createOverview(getDiffStats)
   const allowed = new Set(hosts.map(host => host.toLowerCase()))
   const refGuard = ref => requireValue(validRef(ref, allowed))
@@ -77,8 +77,8 @@ export function createGitLabProvider({ hosts, get, getDiffStats, readReview, cha
       }
       fail('too-large', 'Too many merge requests to complete discovery.')
     },
-    markReady: readOnly,
-    merge: readOnly,
+    markReady: unsupportedChange,
+    merge: unsupportedChange,
     diff(ref, head, signal, base) {
       return read(signal, async () => {
         refGuard(ref)
@@ -118,6 +118,7 @@ export function createGitLabProvider({ hosts, get, getDiffStats, readReview, cha
       const { host, owner, name } = ref.repository
       return `https://${host}/${owner}/${name}/-/blob/${commit}/${path.split('/').map(encodeURIComponent).join('/')}`
     },
+    ...(writeReview && { writeReview }),
     ...(readReview && { readReview(ref, head, signal) {
       return read(signal, () => { refGuard(ref); requireValue(sha(head)); return readReview(ref, head, signal) })
     } }),
