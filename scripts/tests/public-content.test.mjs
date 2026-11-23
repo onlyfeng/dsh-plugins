@@ -68,6 +68,9 @@ test('filters ordinary mail with an exact allow list, preserves synthetic fixtur
   const other = ['contributor', 'public.sample'].join('@')
   f.put('contact.txt', `email: '${other}'`); const r = f.scan('--policy', f.policy)
   assert.equal(r.code, 1); assert.match(r.output, /email/); assert.ok(!r.output.includes(other))
+  const quotedLocal = JSON.stringify(['notes', 'example.test', 'team'].join('@'))
+  f.put('contact.txt', `${quotedLocal}@${['public', 'sample'].join('.')}`)
+  assert.equal(f.scan('--policy', f.policy).code, 1)
   for (const prefix of ['path/', 'team!', 'alias+', 'tag=']) {
     f.put('contact.txt', prefix + f.allow)
     assert.equal(f.scan('--policy', f.policy).code, 1)

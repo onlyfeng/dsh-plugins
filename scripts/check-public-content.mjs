@@ -55,7 +55,7 @@ function checkLine(text, policy) {
       const delimiter = address[0]
       if ((delimiter === "'" || delimiter === '`') && text[match.index + address.length] === delimiter) address = address.slice(1)
       const key = emailKey(address)
-      if (!exampleDomain.test(key.split('@')[1]) && !policy.allowedEmails.has(key)) return 'email'
+      if (!exampleDomain.test(key.slice(key.lastIndexOf('@') + 1)) && !policy.allowedEmails.has(key)) return 'email'
     }
   }
 }
