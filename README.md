@@ -20,6 +20,16 @@
 - 发布新版本时，先提交源码和包版本，再把提交号追加到[发布清单](scripts/market-releases.json)，更新推荐版本并运行 `pnpm run market:build`。评审通过后采用保留源提交的合并方式，确保市场的 Git 安装地址持续可用。
 - 运行 `pnpm test` 和 `pnpm run market:check` 校验插件和索引。修改开发代码或测试时，可以继续保留已发布版本的提交号。
 
+### 发布内容检查
+
+`node scripts/check-public-content.mjs` 检查 Git 暂存区的文本和路径，也会检查扫描器本身。公开 CI 使用通用规则。维护者可从已审查的扫描器版本执行以下命令，在本机核对候选提交及其补丁：
+
+```sh
+node scripts/check-public-content.mjs --repo <候选检出根目录> --ref <最终提交完整SHA> --base <基线完整SHA> --policy <仓库外策略文件>
+```
+
+策略采用 JSON 对象。`forbiddenTerms` 填写站点专用字面词，`allowedEmails` 填写获准公开的完整邮箱地址。策略文件由维护者保存在仓库外的私有目录。`--base` 会检查每个新增提交的署名、说明和补丁，其中包括删除行。检查命中时只显示条目序号、行号与规则类别。原始站点材料、PR 标题和正文由维护者在私有预审时核对。
+
 ### 私有预审与正式发布
 
 1. 在私有预审仓库提交 PR。维护者核对最终差异、提交说明和作者信息中的敏感内容，处理 Codex 反馈，确认同一提交的审查与 CI 通过。
