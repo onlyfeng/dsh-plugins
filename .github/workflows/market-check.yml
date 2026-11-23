@@ -25,7 +25,9 @@ jobs:
           node-version: "24"
 
       - name: Reject deployment-specific identifiers
-        run: node scripts/check-public-content.mjs
+        run: |
+          node --test scripts/tests/public-content.test.mjs
+          node scripts/check-public-content.mjs
 
       - run: corepack enable
 
