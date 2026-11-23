@@ -30,7 +30,8 @@ function report(result) { assert.equal(result.kind, 'success', result.text); ret
 test('stable v1 identity survives edits, deletion and concurrent re-import', async () => {
   const { root, log, run, plan } = fixture()
   const original = { type: 'team/task', data: { version: 2, teamId: root.id, task: {
-    revision: 1, id: 'task-1', description: `[ocr-team:v1:${runId}:${plan.findings[0].fingerprint}]\nEarlier import` } } }
+    revision: 1, id: 'task-1', subject: 'OCR !8 · lib/file1.js:1', writeScopes: ['lib/file1.js'],
+    description: `[ocr-team:v1:${runId}:${plan.findings[0].fingerprint}]\nVerify the finding on MR !8 at ${snap.headSha}.\nlib/file1.js:1 · discussion ${plan.findings[0].discussionId} · note 1\n\n> Review evidence\n> More details` } } }
   log.events.push(original, { ...original, data: { ...original.data, task: { ...original.data.task, revision: 2, description: 'edited', status: 'deleted' } } })
   const preview = report(await run('preview'))
   assert.deepEqual(preview.tasks.map(t => t.taskId), ['task-1', null])
@@ -113,4 +114,26 @@ test('ignores inherited and foreign journal entries and preserves cancellation',
   const reason = new Error('cancelled')
   ctx.sessionQuery.readSession = async () => { controller.abort(reason); return log }
   await assert.rejects(run('import', root, controller.signal), e => e === reason)
+})
+
+test('quotes external text and keeps protected paths in review-only tasks', async () => {
+  const { plan, log, run } = fixture()
+  plan.findings[0].path = 'project/.GiTHuB/workflows/build.yml'
+  plan.findings[1].path = '.env.local'
+  report(await run())
+  for (const { data: { task } } of log.events) {
+    assert.deepEqual(task.writeScopes, []); assert.match(task.subject, /^\[reviewer\]/)
+    assert.match(task.description, /Review only/); assert.match(task.description, /External review text/)
+  }
+  assert.equal(report(await run()).reused, 2)
+})
+test('a marker with different initial task content or scopes cannot substitute for an import', async () => {
+  for (const key of ['description', 'subject', 'writeScopes']) {
+    const { log, run } = fixture(); report(await run())
+    const { task } = log.events[0].data
+    if (key === 'description') task.description = task.description.split('\n')[0]
+    else task[key] = key === 'subject' ? 'Different work' : ['other/path']
+    const result = await run(); assert.equal(result.kind, 'error'); assert.match(result.text, /marker disagrees/)
+    assert.equal(log.events.length, 2)
+  }
 })

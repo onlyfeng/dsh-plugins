@@ -1,6 +1,6 @@
 {
   "name": "@onlyfeng/dsh-ocr-team",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "Import published Open Code Review findings into a DeepSeek Harness Team board for a configured GitLab checkout",
   "type": "module",

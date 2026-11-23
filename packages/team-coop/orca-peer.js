@@ -57,12 +57,30 @@ export function resolveRoute(route, terminals, workspaces) {
   }
 }
 
+const baseEnvironment = ['PATH', 'HOME', 'ORCA_USER_DATA_PATH', 'ORCA_TERMINAL_HANDLE', 'ORCA_PANE_KEY']
+
+/** Orca resolves its local profile and sender identity from these process settings. */
+export function orcaEnvironment(parent = process.env, platform = process.platform) {
+  const windows = platform === 'win32'
+  const osKeys = windows
+    ? ['SYSTEMROOT', 'USERPROFILE', 'APPDATA', 'LOCALAPPDATA', 'TEMP', 'TMP', 'PATHEXT']
+    : ['TMPDIR', 'XDG_CONFIG_HOME', 'XDG_RUNTIME_DIR']
+  const allowed = new Set([...baseEnvironment, ...osKeys])
+  const env = Object.create(null)
+  for (const [key, value] of Object.entries(parent)) {
+    if (allowed.has(windows ? key.toUpperCase() : key)) env[key] = value
+  }
+  env.ORCA_ENVIRONMENT = 'local'
+  return env
+}
+
 async function orca(args) {
   // The static command uses the same local host for both lookup and delivery.
   const tool =
     process.env.ORCA_CLI_COMMAND ||
     (process.env.ORCA_DEV_REPO_ROOT ? 'orca-dev' : process.platform === 'linux' ? 'orca-ide' : 'orca')
   const { stdout } = await exec(tool, args, {
+    env: orcaEnvironment(),
     shell: false,
     windowsHide: true,
     encoding: 'utf8',

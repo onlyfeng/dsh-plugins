@@ -35,7 +35,7 @@ importers:
   packages/web-search-gateway:
     dependencies:
       '@deepseek-ai/schemastery':
-        specifier: '*'
+        specifier: ~3.19.0
         version: 3.19.0
 
 packages:

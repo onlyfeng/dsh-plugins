@@ -34,6 +34,10 @@ The bundle starts with `projects: []`. Configure the `ocr-team` row in your loca
 
 Preview lists proposed tasks and any previously assigned IDs. Import requires a complete reviewed diff and confirmed publication for each finding. It checks the open MR, target project, branches, base/start/head SHAs, diff version and target tip before each creation. GitLab access is read-only. Task content and command results are recorded in the receiving DSH session, so choose a session suitable for the report’s visibility.
 
+Imported descriptions quote the external review text. Verify the source change and the cited discussion before acting on a finding. Findings about Git metadata, CI configuration, environment files or common credential files create reviewer tasks with an empty advisory scope. The Lead decides any subsequent edit.
+
+When reconciling a marker the importer compares the original revision-one subject, description and scopes to the trusted receipt. It recognizes both the current format and the previously published format. A conflicting marker stops the import for local reconciliation. Keep the Team board and receipt store private: Desktop rc.5 records task ownership on assignment and the original task fields on creation.
+
 The same project may produce several runs as its source or target changes. Use a fresh report for an updated MR. If a write was interrupted, replay the same run in the same root session to reconcile it with the Team journal.
 
 ## Migrate an existing installation
