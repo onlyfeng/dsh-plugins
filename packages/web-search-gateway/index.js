@@ -78,6 +78,11 @@ export const Config = z.object({
   messagesMaxTokens: z.number().step(1).min(1).default(4096),
   /** Most server-side searches per Anthropic Messages request. */
   messagesMaxUses: z.number().step(1).min(1).default(5),
+  /** Maximum decoded HTTP body in bytes, before JSON parsing. */
+  maxResponseBytes: z.number().step(1).min(1024).max(32 * 1024 * 1024).default(2 * 1024 * 1024),
+  /** Maximum search result URLs and summary characters exposed to the caller. */
+  maxSources: z.number().step(1).min(1).max(1000).default(100),
+  maxSummaryChars: z.number().step(1).min(128).max(1000000).default(32768),
   /** Per-search deadline in milliseconds. */
   timeoutMs: z.number().step(1).min(1000).default(120000),
 })
@@ -108,6 +113,9 @@ function resolveBase(config) {
   const url = new URL(trimmed)
   if (!['https:', 'http:'].includes(url.protocol) || url.username || url.password || url.search || url.hash) {
     throw new Error('web search: gateway base must be an HTTP(S) URL without credentials, query, or fragment')
+  }
+  if (url.protocol === 'http:' && !(url.hostname === 'localhost' || url.hostname === '[::1]' || /^127(?:\.\d{1,3}){3}$/u.test(url.hostname))) {
+    throw new Error('web search: use HTTPS for a gateway outside loopback before sending credentials')
   }
   if (config.baseURLPath !== '' && !/^\/[A-Za-z0-9_-]+(?:\/[A-Za-z0-9_-]+)*\/?$/u.test(config.baseURLPath)) {
     throw new Error('web search: baseURLPath must be an absolute path such as /v1, without query or fragment')
@@ -140,7 +148,10 @@ function thinkingOf(config) {
 async function resolveApiKey(ctx, reference) {
   const credentials = ctx.get('credentials')
   if (credentials !== undefined) {
-    const hit = await credentials.resolve(reference)
+    let hit
+    try { hit = await credentials.resolve(reference) } catch {
+      throw new Error('web search: the configured gateway credential could not be resolved')
+    }
     if (hit !== undefined && hit.value.length > 0) return hit.value
   }
   const ambient = process.env[reference]
@@ -171,16 +182,61 @@ function deadlineOf(signal, timeoutMs) {
   return signal === undefined ? timeout : AbortSignal.any([signal, timeout])
 }
 
-/** Describe a non-success response with a bounded body excerpt. */
-async function httpFailure(response, what) {
-  let body = ''
-  try {
-    body = (await response.text()).slice(0, 500)
-  } catch {
-    // The response body is unreachable; the status alone still identifies the failure.
-    body = ''
+/** Read at most the configured bytes after content decoding, including chunked responses. */
+async function gatewayJson(url, options, what, limit) {
+  const signal = options.signal
+  const checkSignal = () => {
+    if (signal.aborted) throw new DOMException(`${what}: request cancelled or timed out`, 'AbortError')
   }
-  return new Error(`${what} failed: HTTP ${response.status}${body.length > 0 ? ` ${body}` : ''}`)
+  checkSignal()
+  let response
+  try { response = await fetch(url, options) } catch {
+    checkSignal()
+    throw new Error(`${what}: fetch failed. Check the gateway connection and TLS settings.`)
+  }
+  const reader = response.body?.getReader()
+  const cancel = () => { if (reader) void reader.cancel().catch(() => {}) }
+  signal.addEventListener('abort', cancel, { once: true })
+  try {
+    checkSignal()
+    if (!response.ok) throw new Error(`${what} failed: HTTP ${response.status}`)
+    const overLimit = () => new Error(`${what}: gateway response exceeds maxResponseBytes`)
+    if (Number(response.headers.get('content-length')) > limit) throw overLimit()
+    if (!reader) throw new Error(`${what}: empty gateway response`)
+    let buffer = new Uint8Array(Math.min(8192, limit))
+    let bytes = 0
+    for (;;) {
+      let chunk
+      try { chunk = await reader.read() } catch {
+        checkSignal()
+        throw new Error(`${what}: gateway response was interrupted`)
+      }
+      checkSignal()
+      if (chunk.done) break
+      const next = bytes + chunk.value.byteLength
+      if (next > limit) throw overLimit()
+      if (next > buffer.length) {
+        const larger = new Uint8Array(Math.min(limit, Math.max(next, buffer.length * 2)))
+        larger.set(buffer); buffer = larger
+      }
+      buffer.set(chunk.value, bytes); bytes = next
+    }
+    const decoder = new TextDecoder('utf-8', { fatal: true })
+    try { return JSON.parse(decoder.decode(buffer.subarray(0, bytes))) } catch {
+      throw new Error(`${what}: gateway returned invalid JSON`)
+    }
+  } finally {
+    signal.removeEventListener('abort', cancel)
+    cancel()
+    reader?.releaseLock()
+  }
+}
+
+function searchResult(parsed, config) {
+  const { searched, content, sources } = parsed
+  const truncated = sources.length > config.maxSources || (content?.length ?? 0) > config.maxSummaryChars
+  return { searched, ...(content ? { content: content.slice(0, config.maxSummaryChars) } : {}),
+    sources: sources.slice(0, config.maxSources), truncated }
 }
 
 function isWebSourceURL(value) {
@@ -266,7 +322,7 @@ function readMessages(data) {
     }
   }
   if (!searched && toolError !== undefined) {
-    const code = typeof toolError === 'string' && /^[a-z0-9_]{1,64}$/u.test(toolError) ? toolError : 'unknown'
+    const code = ['too_many_requests', 'invalid_input', 'max_uses_exceeded', 'unavailable', 'query_too_long'].includes(toolError) ? toolError : 'unknown'
     throw new Error(`Messages web search: server-side search failed (${code})`)
   }
   const content = texts.join('\n').trim()
@@ -314,9 +370,9 @@ export function apply(ctx, config) {
     title: 'Gateway web search (Responses)',
     description: describe('an OpenAI Responses route'),
     async search(request, signal) {
-      const key = await resolveApiKey(ctx, config.apiKeyEnv)
       const base = resolveBase(config)
-      const response = await fetch(`${base}/responses`, {
+      const key = await resolveApiKey(ctx, config.apiKeyEnv)
+      const data = await gatewayJson(`${base}/responses`, {
         method: 'POST',
         redirect: 'error',
         headers: { 'content-type': 'application/json', authorization: `Bearer ${key}` },
@@ -328,14 +384,11 @@ export function apply(ctx, config) {
           stream: false,
         }),
         signal: deadlineOf(signal, config.timeoutMs),
-      })
-      if (!response.ok) throw await httpFailure(response, 'Responses web search')
-      const data = await response.json()
-      const { searched, ...result } = readResponses(data)
+      }, 'Responses web search', config.maxResponseBytes)
+      const { searched, ...result } = searchResult(readResponses(data), config)
       if (!searched) {
-        const reason = typeof data?.error?.message === 'string' ? `: ${data.error.message}` : ''
         throw new Error(
-          `Responses web search ran no server-side search${reason}. Model ${config.responsesModel} may not support the ${config.responsesToolType} server tool on this gateway.`,
+          `Responses web search ran no server-side search. Model ${config.responsesModel} may not support the ${config.responsesToolType} server tool on this gateway.`,
         )
       }
       return result
@@ -348,8 +401,8 @@ export function apply(ctx, config) {
     title: 'Gateway web search (Messages)',
     description: describe('an Anthropic Messages route'),
     async search(request, signal) {
-      const key = await resolveApiKey(ctx, config.apiKeyEnv)
       const base = resolveBase(config)
+      const key = await resolveApiKey(ctx, config.apiKeyEnv)
       const body = {
         model: config.messagesModel,
         max_tokens: config.messagesMaxTokens,
@@ -357,7 +410,7 @@ export function apply(ctx, config) {
         tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: config.messagesMaxUses }],
         ...thinkingOf(config),
       }
-      const response = await fetch(`${base}/messages`, {
+      const data = await gatewayJson(`${base}/messages`, {
         method: 'POST',
         redirect: 'error',
         headers: {
@@ -368,15 +421,11 @@ export function apply(ctx, config) {
         },
         body: JSON.stringify(body),
         signal: deadlineOf(signal, config.timeoutMs),
-      })
-      if (!response.ok) throw await httpFailure(response, 'Messages web search')
-      const data = await response.json()
-      const written = readMessages(data)
-      const { searched, ...result } = written
+      }, 'Messages web search', config.maxResponseBytes)
+      const { searched, ...result } = searchResult(readMessages(data), config)
       if (!searched) {
-        const reason = typeof data?.error?.message === 'string' ? `: ${data.error.message}` : ''
         throw new Error(
-          `Messages web search ran no server-side search${reason}. Model ${config.messagesModel} may not support the web_search server tool on this gateway.`,
+          `Messages web search ran no server-side search. Model ${config.messagesModel} may not support the web_search server tool on this gateway.`,
         )
       }
       return result

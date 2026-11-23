@@ -65,3 +65,17 @@ Each peer has an `id`, `label` and `role` (`observer` or `controller`). Give eac
 4. **Confirm the return.** The controller checks the evidence, prepares a fresh packet with `kind:"returned"`, the current revision and the exact released checkpoint, and stages it through the same CLI. Checkpoints may contain multiple lines and must fit in 2048 UTF-8 bytes. Preserve their whitespace when preparing the return receipt. For a live route the controller posts `TEAM-COOP RETURNED <hash>` as its entire assistant message. The Lead runs `/team-coop returned {"id":"slice-a","rev":3,"receipt":"<hash>"}`. An unaccepted offer or consultation can be closed with `/team-coop cancel {"id":"slice-a","rev":1}`.
 
 Use `node orca-peer.js check ROUTES PEER` to resolve a pinned route and `draft ROUTES PEER MESSAGE_JSON` to preview a message. `send` explicitly sends the prepared text. A receipt without a live route trusts the operator and the private inbox ACL. A digest binds the bytes. Keep the SQLite state and inboxes in a private directory. After a restart or revision conflict, reconcile `/team-coop status` with the peer ledger before making the next change.
+
+## Protect and archive the ledger
+
+Keep the SQLite state, site registry and receipt inboxes in private directories. On POSIX, use an account-owned state directory (`chmod 700`). The plugin creates the database with mode `0600` and tightens existing database, WAL, SHM and rollback journal files before opening them. On Windows, restrict the state and archive directories' inherited ACLs to the service account and authorized administrators. Orca subprocesses receive a local environment with OS path and profile settings, the Orca user-data location, and caller pane and terminal identity.
+
+Persistent sites retain the full lane event history and allocation receipts in the live database. Closed lane IDs and existing allocation records participate in reconciliation and duplicate detection. At each required retention interval run the following from the package directory with Node 24 or later. Choose an existing private parent directory and a new archive directory for each snapshot.
+
+```sh
+node archive-state.js /private/team/state.sqlite /private/backups/team-2026-11-23
+```
+
+The command copies all committed tables through SQLite's backup API, including committed WAL pages, and runs `PRAGMA integrity_check`. It writes `SHA256SUMS` on success and prints the SHA-256 digest. Keep the digest in your private backup inventory and check each transferred snapshot against it. On POSIX run `sha256sum -c SHA256SUMS` in the archive directory. On Windows use `Get-FileHash -Algorithm SHA256 state.sqlite`. A failed run may leave an incomplete directory. Choose a fresh directory when retrying.
+
+For disaster recovery, securely back up the site registry and controller receipt inboxes alongside the database snapshot. Take these together with all participating writers paused when a single recovery point across files is required. To restore, stop all Team Coop users of the database, verify the digest, copy the snapshot into a fresh private state directory, and point `stateFile` at the restored file. Restore the corresponding registry and inboxes and reconcile open agreements with the peer ledger before resuming dispatch. Keep prior snapshots according to your site's private retention policy.

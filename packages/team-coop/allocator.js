@@ -1,6 +1,6 @@
 import { authoredDependency, effectivePreset, ownsTask } from './identity.js'
 import { createHash, randomUUID } from 'node:crypto'
-import { DatabaseSync } from 'node:sqlite'
+import { openPrivateDatabase } from './private-database.js'
 import { resolveBackend } from './backends.js'
 import { allocationHolds } from './holds.js'
 import { routeFor } from './staffing.js'
@@ -46,7 +46,7 @@ async function serialize(id, work) {
   }
 }
 function journal(filename) {
-  const db = new DatabaseSync(filename)
+  const db = openPrivateDatabase(filename)
   try {
     db.exec(`PRAGMA busy_timeout=5000; PRAGMA synchronous=FULL;
       CREATE TABLE IF NOT EXISTS coop_alloc_rounds(root TEXT PRIMARY KEY, paused INTEGER NOT NULL) STRICT;

@@ -1,6 +1,6 @@
 {
   "name": "@onlyfeng/dsh-web-search-gateway",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "ctx.web search providers that run an OpenAI Responses or Anthropic Messages gateway's own server-side web_search tool",
   "type": "module",
   "license": "MIT",
@@ -33,7 +33,8 @@
     "cordis.patch.yml",
     "locale",
     "icon.svg",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "engines": {
     "dsh": "0.2.2-rc.5 || >=0.2.0 <0.3.0"
@@ -44,6 +45,6 @@
     }
   },
   "peerDependencies": {
-    "@deepseek-ai/schemastery": "*"
+    "@deepseek-ai/schemastery": "~3.19.0"
   }
 }

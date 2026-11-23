@@ -183,3 +183,67 @@ test('credentialed requests never contact a redirect target', async t => {
   for (const provider of providers.values()) await assert.rejects(provider.search({ query: 'test' }), /fetch failed/)
   assert.equal(targets, 0)
 })
+
+for (const protocol of ['responses', 'messages']) {
+  test(`${protocol} limits streamed bytes, cancels oversize input and hides untrusted error details`, async t => {
+    const run = () => providers.get(`gateway-${protocol}`).search({ query: 'sample' })
+    const { providers } = mount({ baseURL: base, maxResponseBytes: 1024 })
+    let makeResponse, cancelled = false
+    t.mock.method(globalThis, 'fetch', async () => makeResponse())
+    makeResponse = () => new Response(new ReadableStream({ start(c) { c.enqueue(new Uint8Array(600)); c.enqueue(new Uint8Array(425)) }, cancel() { cancelled = true } }))
+    await assert.rejects(run(), /exceeds maxResponseBytes/); assert.equal(cancelled, true)
+    makeResponse = () => new Response('a', { headers: { 'content-length': '2048' } })
+    await assert.rejects(run(), /exceeds maxResponseBytes/)
+    const unexpected = 'private-upstream-diagnostic'
+    makeResponse = () => new Response(unexpected, { status: 403 })
+    await assert.rejects(run(), e => e.message.includes('HTTP 403') && !e.message.includes(unexpected))
+    makeResponse = () => new Response('{' + unexpected)
+    await assert.rejects(run(), e => e.message.includes('invalid JSON') && !e.message.includes(unexpected))
+    makeResponse = () => Response.json({ error: { message: unexpected } })
+    await assert.rejects(run(), e => !e.message.includes(unexpected))
+  })
+}
+test('limits exposed sources and summary, and only sends credentials to HTTPS or loopback', async t => {
+  const sources = ['one','two'].map(name => ({url: base + '/' + name, title: name}))
+  t.mock.method(globalThis, 'fetch', async () => Response.json({ output: [
+    { type: 'web_search_call', status: 'completed', action: { sources } },
+    { type: 'message', content: [{ type: 'output_text', text: 'x'.repeat(160) }] },
+  ] }))
+  const { providers } = mount({ baseURL: base, maxSummaryChars: 128, maxSources: 1 })
+  const result = await providers.get('gateway-responses').search({query:'sample'})
+  assert.equal(result.truncated,true); assert.equal(result.content.length,128); assert.equal(result.sources.length,1)
+  assert.throws(() => mount({baseURL:'http://gateway.example.test'}), /HTTPS/)
+  assert.throws(() => mount({baseURL:'http://localhost.example.test'}), /HTTPS/)
+  for (const baseURL of ['http://localhost', 'http://127.0.0.1:8080/api', 'http://[::1]']) assert.equal(mount({baseURL}).providers.size,2)
+})
+test('cancellation interrupts a stalled body and raw transport errors stay out of diagnostics', async t => {
+  const { providers } = mount({ baseURL: base })
+  let started; const reading = new Promise(r=>{started=r}); const ctl=new AbortController()
+  const cause='private-upstream-diagnostic'
+  const mock=t.mock.method(globalThis,'fetch',async()=>new Response(new ReadableStream({pull(){started()}})))
+  const request=providers.get('gateway-responses').search({query:'sample'},ctl.signal)
+  await reading; ctl.abort(new Error(cause))
+  await assert.rejects(request,e=>e.name==='AbortError' && !e.message.includes(cause))
+  mock.mock.mockImplementation(async()=>{throw new Error(cause)})
+  await assert.rejects(providers.get('gateway-messages').search({query:'sample'}), e=>e.message.includes('fetch failed')&&!e.message.includes(cause))
+})
+
+test('accepts an exact UTF-8 byte boundary, and cancels a non-success body before waiting for it', async t => {
+  const {providers}=mount({baseURL:base,maxResponseBytes:1024})
+  const json=JSON.stringify(payloads.responses);const bytes=Buffer.from(json+' '.repeat(1024-Buffer.byteLength(json)))
+  let response=new Response(bytes)
+  t.mock.method(globalThis,'fetch',async()=>response)
+  assert.equal((await providers.get('gateway-responses').search({query:'sample'})).truncated,false)
+  let cancelled=false
+  response=new Response(new ReadableStream({cancel(){cancelled=true}}),{status:403})
+  await assert.rejects(providers.get('gateway-messages').search({query:'sample'}), /HTTP 403/)
+  assert.equal(cancelled,true)
+})
+test('the configured request deadline cancels a stalled success body', {timeout:5000}, async t => {
+  const keepAlive=setInterval(()=>{},5000);t.after(()=>clearInterval(keepAlive))
+  let cancelled=false
+  t.mock.method(globalThis,'fetch',async()=>new Response(new ReadableStream({cancel(){cancelled=true}})))
+  const {providers}=mount({baseURL:base,timeoutMs:1000})
+  await assert.rejects(providers.get('gateway-responses').search({query:'sample'}), e=>e.name==='AbortError')
+  assert.equal(cancelled,true)
+})

@@ -1,6 +1,6 @@
 {
   "name": "@onlyfeng/dsh-team-coop",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "Coordinate a general DSH team, select project packs, and hand bounded tasks between existing teams",
   "type": "module",

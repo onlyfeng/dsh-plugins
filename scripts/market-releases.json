@@ -25,7 +25,7 @@
         "zh": "Open Code Review 团队审查任务"
       },
       "dist-tags": {
-        "latest": "0.1.1"
+        "latest": "0.1.2"
       }
     },
     "@onlyfeng/dsh-team-coop": {
@@ -34,7 +34,7 @@
         "zh": "Agent 团队协作与任务交接"
       },
       "dist-tags": {
-        "latest": "0.1.1"
+        "latest": "0.1.2"
       }
     },
     "@onlyfeng/dsh-web-search-gateway": {
@@ -43,7 +43,7 @@
         "zh": "网页搜索网关"
       },
       "dist-tags": {
-        "latest": "0.2.1"
+        "latest": "0.2.2"
       }
     }
   },
@@ -101,6 +101,24 @@
       "version": "0.1.2",
       "path": "packages/forge-gitlab-project",
       "commit": "352baf2127ee48fd110992846a25b55b860b9d2f"
+    },
+    {
+      "name": "@onlyfeng/dsh-ocr-team",
+      "version": "0.1.2",
+      "path": "packages/ocr-team",
+      "commit": "914ba8ecce189fa478b72f0b307af60807d88c6a"
+    },
+    {
+      "name": "@onlyfeng/dsh-team-coop",
+      "version": "0.1.2",
+      "path": "packages/team-coop",
+      "commit": "914ba8ecce189fa478b72f0b307af60807d88c6a"
+    },
+    {
+      "name": "@onlyfeng/dsh-web-search-gateway",
+      "version": "0.2.2",
+      "path": "packages/web-search-gateway",
+      "commit": "914ba8ecce189fa478b72f0b307af60807d88c6a"
     }
   ]
 }

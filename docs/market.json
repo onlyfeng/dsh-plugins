@@ -166,9 +166,22 @@
         ]
       },
       "dist-tags": {
-        "latest": "0.1.1"
+        "latest": "0.1.2"
       },
       "versions": [
+        {
+          "version": "0.1.2",
+          "publishTimestamp": 1795418771,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/onlyfeng/dsh-plugins",
+            "commit": "914ba8ecce189fa478b72f0b307af60807d88c6a",
+            "path": "packages/ocr-team"
+          },
+          "engines": {
+            "dsh": "0.2.2-rc.5"
+          }
+        },
         {
           "version": "0.1.1",
           "publishTimestamp": 1795248575,
@@ -206,9 +219,22 @@
         ]
       },
       "dist-tags": {
-        "latest": "0.1.1"
+        "latest": "0.1.2"
       },
       "versions": [
+        {
+          "version": "0.1.2",
+          "publishTimestamp": 1795418771,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/onlyfeng/dsh-plugins",
+            "commit": "914ba8ecce189fa478b72f0b307af60807d88c6a",
+            "path": "packages/team-coop"
+          },
+          "engines": {
+            "dsh": "0.2.2-rc.5"
+          }
+        },
         {
           "version": "0.1.1",
           "publishTimestamp": 1795248575,
@@ -247,9 +273,22 @@
         ]
       },
       "dist-tags": {
-        "latest": "0.2.1"
+        "latest": "0.2.2"
       },
       "versions": [
+        {
+          "version": "0.2.2",
+          "publishTimestamp": 1795418771,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/onlyfeng/dsh-plugins",
+            "commit": "914ba8ecce189fa478b72f0b307af60807d88c6a",
+            "path": "packages/web-search-gateway"
+          },
+          "engines": {
+            "dsh": "0.2.2-rc.5 || >=0.2.0 <0.3.0"
+          }
+        },
         {
           "version": "0.2.1",
           "publishTimestamp": 1795248575,

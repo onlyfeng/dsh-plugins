@@ -1,4 +1,4 @@
-import { DatabaseSync } from 'node:sqlite'
+import { openPrivateDatabase } from './private-database.js'
 import { contractText as text } from './contract-text.js'
 import { createHash } from 'node:crypto'
 import { isAbsolute, resolve, sep } from 'node:path'
@@ -116,7 +116,7 @@ function checkReceipt(value, lane, kind) {
   }
 }
 export function openStore(filename) {
-  const db = new DatabaseSync(filename)
+  const db = openPrivateDatabase(filename)
   try {
     db.exec(`PRAGMA busy_timeout=5000; PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL;
       CREATE TABLE IF NOT EXISTS coop_packs(root TEXT PRIMARY KEY,pack TEXT NOT NULL) STRICT;

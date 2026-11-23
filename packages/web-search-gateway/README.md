@@ -44,6 +44,8 @@ dsh 自带的两个 search provider 都有各自前提，网关没满足时就�
 | `messagesThinking` | `omit` | `omit` 不发该字段；`enabled` 发 `{type:'enabled', budget_tokens}`；`disabled` 发 `{type:'disabled'}`；其它字符串原样作为 `type` 发送（用于网关自定义扩展） |
 | `messagesThinkingBudgetTokens` | `4096` | `messagesThinking: enabled` 时的 `budget_tokens` |
 | `messagesMaxTokens` / `messagesMaxUses` | `4096` / `5` | Messages 请求的输出上限与单次最大搜索次数 |
+| `maxResponseBytes` | `2097152` | 网关响应解压后的字节上限，包含分块传输；超限终止读取 |
+| `maxSources` / `maxSummaryChars` | `100` / `32768` | 返回来源数和摘要长度上限，发生截断时设置 `truncated` |
 | `timeoutMs` | `120000` | 单次搜索超时（毫秒） |
 
 **`messagesThinking` 怎么选没有通用答案**：哪种模式被接受，取决于网关和模型的具体实现，不同厂商、不同模型差异很大。建议顺序：先用默认的 `omit` 试；网关报错提示需要显式启用思考，就试 `enabled`；报错提示要求某个自定义模式名，就把该模式名原样填进 `messagesThinking`。把你验证过的组合记在自己的 profile 配置旁，供同事复用。
@@ -92,7 +94,7 @@ dsh plugin --profile <profile> add "git+https://github.com/onlyfeng/dsh-plugins.
 
 ## 验证
 
-重启后在设置页「Web 搜索与抓取」里应能看到 `Gateway web search (Responses)` / `Gateway web search (Messages)`；或直接让 Agent 调用 `web_search` 工具触发一次搜索。失败时错误信息会带上网关返回的状态码和响应片段，便于判断是协议不对、模型不支持该服务端工具，还是 `thinking` 模式不匹配。
+重启后在设置页「Web 搜索与抓取」里应能看到 `Gateway web search (Responses)` / `Gateway web search (Messages)`；或直接让 Agent 调用 `web_search` 工具触发一次搜索。失败时会显示 HTTP 状态码或预定义错误类型。协议细节可通过受控的网关日志核对。远程网关使用 HTTPS，本机回环开发服务可以使用 HTTP。
 
 ## 已知限制
 
